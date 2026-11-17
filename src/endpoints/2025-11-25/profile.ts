@@ -1,4 +1,5 @@
 import type { JsonRpcErrorResponse } from "../../core/jsonrpc.ts";
+import type { ToolDefinition, ToolResult } from "../../tools/types.ts";
 
 // What sets one legacy revision apart from another on the wire. The legacy
 // server is shared; each legacy revision is a profile, and an older revision
@@ -12,12 +13,20 @@ export interface LegacyProfile {
   // id; earlier schemas require one and have no valid form for it, so these
   // revisions send `id: null`, as JSON-RPC 2.0 and the official SDK server do.
   unreadableId: "omit" | "null";
+  // Whether a POST body may be a JSON-RPC batch: only in 2025-03-26, which
+  // required servers to accept them; 2025-06-18 removed them.
+  batching: boolean;
+  // The catalog in this revision's vocabulary, for revisions that predate
+  // parts of it. Omitted when the catalog is served as it is.
+  adaptDefinition?: (definition: ToolDefinition) => Record<string, unknown>;
+  adaptResult?: (result: ToolResult) => Record<string, unknown>;
 }
 
 export const PROFILE_2025_11_25: LegacyProfile = {
   revision: "2025-11-25",
   invalidArguments: "tool-error",
   unreadableId: "omit",
+  batching: false,
 };
 
 export function shapeFor(profile: LegacyProfile) {

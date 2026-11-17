@@ -1,5 +1,12 @@
 import express, { type Request, type Response, Router } from "express";
-import { dispatch, ErrorCode, parseJson, parseMessage } from "../../core/jsonrpc.ts";
+import {
+  dispatch,
+  ErrorCode,
+  errorResponse,
+  type JsonRpcResponse,
+  parseJson,
+  parseMessage,
+} from "../../core/jsonrpc.ts";
 import { reject, TRANSPORT_ERROR_CODE } from "../2026-07-28/errors.ts";
 import {
   bodyErrorHandlerWith,
@@ -21,23 +28,28 @@ import { type LegacyProfile, PROFILE_2025_11_25, shapeFor } from "./profile.ts";
 // One server for every legacy revision, driven by profiles (newest first):
 // the pinned endpoints pass one, the dual-era /mcp passes all it serves.
 
+// The revision a message without MCP-Protocol-Version is served as. The
+// header arrived in 2025-06-18, so the spec has servers assume 2025-03-26
+// when they have no other way to tell; a pinned endpoint's path tells, and it
+// has a single profile anyway.
+export function defaultProfile(profiles: readonly LegacyProfile[]): LegacyProfile {
+  return profiles.find((profile) => profile.revision === "2025-03-26") ?? (profiles[0] as LegacyProfile);
+}
+
 // Which revision serves a message. initialize names the version it wants,
 // and gets it when served, the newest otherwise. Every later message carries
 // the negotiated version in MCP-Protocol-Version; a header naming a version
-// not served is refused. A missing header gets the newest profile: the
-// spec's fallback (assume 2025-03-26) is for servers with no other way to
-// tell, and a pinned endpoint's path already tells.
+// not served is refused.
 function profileFor(
   message: { method?: string; params?: Record<string, unknown> } | undefined,
   headerVersion: string | undefined,
   profiles: readonly LegacyProfile[],
 ): LegacyProfile | undefined {
-  const newest = profiles[0] as LegacyProfile;
   if (message?.method === "initialize") {
     const requested = message.params?.protocolVersion;
-    return profiles.find((profile) => profile.revision === requested) ?? newest;
+    return profiles.find((profile) => profile.revision === requested) ?? (profiles[0] as LegacyProfile);
   }
-  if (headerVersion === undefined) return newest;
+  if (headerVersion === undefined) return defaultProfile(profiles);
   return profiles.find((profile) => profile.revision === headerVersion);
 }
 
@@ -51,6 +63,66 @@ function handlersFor(profile: LegacyProfile) {
   return handlers;
 }
 
+function unsupportedHeader(headerVersion: string, profiles: readonly LegacyProfile[]) {
+  return reject(
+    400,
+    undefined,
+    TRANSPORT_ERROR_CODE,
+    `Bad Request: Unsupported protocol version: ${headerVersion} (supported versions: ${profiles.map((p) => p.revision).join(", ")})`,
+  );
+}
+
+// A JSON-RPC batch, for the revision that has them (2025-03-26). Requests and
+// notifications may be batched together, responses only with responses.
+// Each element is answered on its own, as JSON-RPC prescribes: a malformed
+// element gets its error in the response array without failing the others.
+async function serveBatch(
+  batch: unknown[],
+  res: Response,
+  profile: LegacyProfile,
+): Promise<void> {
+  const shape = shapeFor(profile);
+  if (batch.length === 0) {
+    return send(res, reject(400, undefined, ErrorCode.InvalidRequest, "Invalid Request: empty batch"), shape);
+  }
+
+  const parsed = batch.map(parseMessage);
+  const responses = parsed.filter((element) => element.kind === "response").length;
+  if (responses === parsed.length) {
+    res.status(202).end();
+    return;
+  }
+  if (responses > 0) {
+    return send(
+      res,
+      reject(400, undefined, ErrorCode.InvalidRequest, "Invalid Request: a batch cannot mix responses with requests or notifications"),
+      shape,
+    );
+  }
+
+  const answers: JsonRpcResponse[] = [];
+  for (const element of parsed) {
+    if (element.kind === "invalid") {
+      answers.push(shape(element.response));
+    } else if (element.kind === "request" && element.message.method === "initialize") {
+      // Nothing else is possible until initialization completes, so the
+      // spec forbids batching it.
+      answers.push(
+        errorResponse(element.message.id, ErrorCode.InvalidRequest, "Invalid Request: initialize must not be part of a JSON-RPC batch"),
+      );
+    } else if (element.kind === "request") {
+      answers.push((await dispatch(element.message, handlersFor(profile), {})) as JsonRpcResponse);
+    }
+    // Notifications are accepted and get no answer.
+  }
+
+  if (answers.length === 0) {
+    res.status(202).end();
+    return;
+  }
+  res.status(200).json(answers);
+}
+
 // Serves one already-decoded POST body. Exported for the dual-era /mcp
 // endpoint, which routes legacy traffic here.
 export async function serveLegacy(
@@ -61,36 +133,34 @@ export async function serveLegacy(
 ): Promise<void> {
   const headerVersion = req.get("mcp-protocol-version")?.trim();
   // Before the body is understood, errors take the shape of the revision the
-  // header names, or of the newest one served.
+  // header names, or of the one a missing header means.
   const early = shapeFor(
-    profiles.find((profile) => profile.revision === headerVersion) ?? (profiles[0] as LegacyProfile),
+    headerVersion === undefined
+      ? defaultProfile(profiles)
+      : (profiles.find((profile) => profile.revision === headerVersion) ?? (profiles[0] as LegacyProfile)),
   );
 
-  // Batches were removed in 2025-06-18: the body is a single message.
   if (Array.isArray(body)) {
-    return send(
-      res,
-      reject(400, undefined, ErrorCode.InvalidRequest, "Invalid Request: JSON-RPC batches are not supported"),
-      early,
-    );
+    // A batch cannot contain initialize, so its revision comes from the
+    // header alone.
+    const profile = profileFor(undefined, headerVersion, profiles);
+    if (!profile) return send(res, unsupportedHeader(headerVersion as string, profiles), early);
+    if (!profile.batching) {
+      return send(
+        res,
+        reject(400, undefined, ErrorCode.InvalidRequest, "Invalid Request: JSON-RPC batches are not supported"),
+        early,
+      );
+    }
+    return serveBatch(body, res, profile);
   }
+
   const parsed = parseMessage(body);
   if (parsed.kind === "invalid") return send(res, { status: 400, body: parsed.response }, early);
 
   const message = parsed.kind === "response" ? undefined : parsed.message;
   const profile = profileFor(message, headerVersion, profiles);
-  if (!profile) {
-    return send(
-      res,
-      reject(
-        400,
-        undefined,
-        TRANSPORT_ERROR_CODE,
-        `Bad Request: Unsupported protocol version: ${headerVersion} (supported versions: ${profiles.map((p) => p.revision).join(", ")})`,
-      ),
-      early,
-    );
-  }
+  if (!profile) return send(res, unsupportedHeader(headerVersion as string, profiles), early);
 
   // Notifications (initialized, cancelled) and responses to server requests
   // (the mock sends none) are accepted and dropped.

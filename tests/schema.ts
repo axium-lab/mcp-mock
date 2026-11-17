@@ -74,9 +74,12 @@ const ID_REQUIRED: readonly RevisionId[] = ["2025-06-18", "2025-03-26", "2024-11
 // schema cannot express it, so the rest of the message is checked as if the
 // id were a real one.
 export function validateMessage(revision: RevisionId, value: unknown): SchemaResult {
-  const body = value as { id?: unknown; error?: unknown } | null;
-  if (ID_REQUIRED.includes(revision) && body?.id === null && body.error !== undefined) {
-    return validateAgainst(revision, "JSONRPCMessage", { ...body, id: 0 });
-  }
-  return validateAgainst(revision, "JSONRPCMessage", value);
+  if (!ID_REQUIRED.includes(revision)) return validateAgainst(revision, "JSONRPCMessage", value);
+  const substitute = (message: unknown) => {
+    const body = message as { id?: unknown; error?: unknown } | null;
+    return body?.id === null && body.error !== undefined ? { ...body, id: 0 } : message;
+  };
+  // A 2025-03-26 batch response can carry such errors among its elements.
+  const checked = Array.isArray(value) ? value.map(substitute) : substitute(value);
+  return validateAgainst(revision, "JSONRPCMessage", checked);
 }

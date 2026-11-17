@@ -12,6 +12,8 @@ export const PROFILE_2025_06_18: LegacyProfile = {
   invalidArguments: "protocol-error",
   // Its schema requires an id on every error response.
   unreadableId: "null",
+  // This revision removed batching.
+  batching: false,
 };
 
 export const endpoint20250618: Endpoint = {

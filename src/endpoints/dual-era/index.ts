@@ -1,7 +1,8 @@
 import express, { type Request, type Response, Router } from "express";
 import { parseJson } from "../../core/jsonrpc.ts";
+import { PROFILE_2025_03_26 } from "../2025-03-26/index.ts";
 import { PROFILE_2025_06_18 } from "../2025-06-18/index.ts";
-import { serveLegacy } from "../2025-11-25/index.ts";
+import { defaultProfile, serveLegacy } from "../2025-11-25/index.ts";
 import { PROFILE_2025_11_25, shapeFor } from "../2025-11-25/profile.ts";
 import { hasClaim } from "../2026-07-28/envelope.ts";
 import {
@@ -15,8 +16,9 @@ import { MODERN_VERSIONS, serveModern } from "../2026-07-28/index.ts";
 import type { Endpoint } from "../types.ts";
 
 // The legacy revisions /mcp serves, newest first: initialize negotiates among
-// them, and later requests are served as the one their header names.
-const LEGACY_PROFILES = [PROFILE_2025_11_25, PROFILE_2025_06_18];
+// them, later requests are served as the one their header names, and a
+// request without the header as 2025-03-26, as the spec prescribes.
+const LEGACY_PROFILES = [PROFILE_2025_11_25, PROFILE_2025_06_18, PROFILE_2025_03_26];
 
 // /mcp serves every client, whatever era it speaks, the way the spec
 // describes a dual-era server: the era is read from how each request opens,
@@ -47,11 +49,15 @@ function isModern(body: unknown, headerVersion: string | undefined): boolean {
 }
 
 // Errors raised before the body says which era it is (transport refusals,
-// malformed JSON) take the shape of the legacy revision the header names, if
-// any; otherwise the modern shape, which 2025-11-25 shares.
+// malformed JSON) take the shape of the legacy revision the header names, or
+// of 2025-03-26 when there is no header (only its clients omit it); a modern
+// or unknown header gets the modern shape, which 2025-11-25 shares.
 function shapeForHeader(req: Request): ErrorShape | undefined {
   const headerVersion = req.get("mcp-protocol-version")?.trim();
-  const profile = LEGACY_PROFILES.find((candidate) => candidate.revision === headerVersion);
+  const profile =
+    headerVersion === undefined
+      ? defaultProfile(LEGACY_PROFILES)
+      : LEGACY_PROFILES.find((candidate) => candidate.revision === headerVersion);
   return profile ? shapeFor(profile) : undefined;
 }
 
@@ -74,7 +80,7 @@ function methodNotAllowed(req: Request, res: Response): void {
 export const dualEraEndpoint: Endpoint = {
   name: "dual-era",
   mountPath: "",
-  revisions: [...MODERN_VERSIONS, "2025-11-25", "2025-06-18"],
+  revisions: [...MODERN_VERSIONS, "2025-11-25", "2025-06-18", "2025-03-26"],
   createRouter() {
     const router = Router();
     router.use("/mcp", express.text({ type: () => true, limit: "4mb" }));

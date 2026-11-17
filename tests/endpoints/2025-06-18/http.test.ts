@@ -136,8 +136,11 @@ describe("2025-06-18 over raw HTTP", () => {
       const as0618 = await fetch(`${running.origin}/mcp`, { headers: { "mcp-protocol-version": REVISION } });
       expect(as0618.status).toBe(405);
       expect(((await as0618.json()) as { id: unknown }).id).toBeNull();
+      // No header: only 2025-03-26 clients omit it, so its shape applies.
       const bare = await fetch(`${running.origin}/mcp`);
-      expect("id" in ((await bare.json()) as object)).toBe(false);
+      expect(((await bare.json()) as { id: unknown }).id).toBeNull();
+      const modern = await fetch(`${running.origin}/mcp`, { headers: { "mcp-protocol-version": "2026-07-28" } });
+      expect("id" in ((await modern.json()) as object)).toBe(false);
       const malformed = await post(undefined, {}, "{not json", "/mcp");
       expect(malformed.body.id).toBeNull();
     });

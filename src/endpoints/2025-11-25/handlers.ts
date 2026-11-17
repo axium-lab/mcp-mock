@@ -10,6 +10,9 @@ function isObject(value: unknown): value is Record<string, unknown> {
 // The methods of a legacy revision. Results are plain objects: resultType,
 // cache hints and serverInfo in _meta only arrived with 2026-07-28.
 export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, never>> {
+  const adaptDefinition = profile.adaptDefinition ?? ((definition) => ({ ...definition }));
+  const adaptResult = profile.adaptResult ?? ((result) => ({ ...result }));
+
   return {
     requests: {
       // The profile was chosen from the requested version (or as the newest
@@ -39,12 +42,11 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, 
 
       "tools/list": (params) => {
         checkNoCursor(params);
-        return { tools: listTools() };
+        return { tools: listTools().map(adaptDefinition) };
       },
 
-      "tools/call": (params) => ({
-        ...callTool(params, { invalidArguments: profile.invalidArguments }),
-      }),
+      "tools/call": (params) =>
+        adaptResult(callTool(params, { invalidArguments: profile.invalidArguments })),
     },
   };
 }
