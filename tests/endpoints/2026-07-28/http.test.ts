@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { SERVER_INFO } from "../../../src/core/server-info.ts";
 import { validateAgainst, validateMessage } from "../../schema.ts";
 import { type RunningServer, startServer, stopServer } from "../../server.ts";
 
@@ -80,7 +81,7 @@ describe("2026-07-28 over raw HTTP", () => {
         ttlMs: 3_600_000,
         cacheScope: "public",
         resultType: "complete",
-        _meta: { "io.modelcontextprotocol/serverInfo": { name: "mcp-mock", version: "0.0.0" } },
+        _meta: { "io.modelcontextprotocol/serverInfo": SERVER_INFO },
       });
       expectValid(reply);
       expect(validateAgainst(REVISION, "DiscoverResult", reply.body.result).valid).toBe(true);

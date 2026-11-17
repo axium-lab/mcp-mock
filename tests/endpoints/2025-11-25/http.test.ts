@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { SERVER_INFO } from "../../../src/core/server-info.ts";
 import { validateAgainst, validateMessage } from "../../schema.ts";
 import { type RunningServer, startServer, stopServer } from "../../server.ts";
 
@@ -72,7 +73,7 @@ describe("2025-11-25 over raw HTTP", () => {
       expect(reply.body.result).toEqual({
         protocolVersion: REVISION,
         capabilities: { tools: {}, resources: {}, prompts: {} },
-        serverInfo: { name: "mcp-mock", version: "0.0.0" },
+        serverInfo: SERVER_INFO,
       });
       expect(reply.headers.get("mcp-session-id")).toBeNull();
       expectValid(reply, "InitializeResult", reply.body.result);

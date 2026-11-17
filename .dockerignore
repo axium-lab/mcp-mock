@@ -1,0 +1,15 @@
+node_modules/
+tests/
+schemas/
+scripts/
+.git/
+.github/
+.gitignore
+*.md
+LICENSE
+Dockerfile
+.dockerignore
+tsconfig.json
+bunfig.toml
+.env
+*.log

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { SERVER_INFO } from "../../../src/core/server-info.ts";
 import { validateMessage } from "../../schema.ts";
 import { type RunningServer, startServer, stopServer } from "../../server.ts";
 import { openSse } from "../../sse.ts";
@@ -43,7 +44,7 @@ describe("2024-11-05 over raw HTTP+SSE", () => {
     expect(body.result).toEqual({
       protocolVersion: REVISION,
       capabilities: { tools: {}, resources: { subscribe: true }, prompts: {} },
-      serverInfo: { name: "mcp-mock", version: "0.0.0" },
+      serverInfo: SERVER_INFO,
     });
     expect(validateMessage(REVISION, body)).toEqual({ valid: true, errors: [] });
     sse.close();

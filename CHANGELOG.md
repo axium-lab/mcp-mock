@@ -6,8 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-17
+
+First release.
+
 ### Added
 
+- A Docker image (`ghcr.io/axium-lab/mcp-mock`), published for amd64 and arm64 on every release, with a health check on `/health`.
 - Project foundation: Express server on Bun that also runs on Node, with a `/health` endpoint reporting the running version.
 - Transport-agnostic JSON-RPC 2.0 core: message parsing and classification, and dispatch to method handlers with standard error responses.
 - The five supported spec revisions (2026-07-28, 2025-11-25, 2025-06-18, 2025-03-26 and 2024-11-05) and their era, modern or legacy.
@@ -70,8 +75,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Failure paths for tests: the `mcp-mock:deny` scope makes the user deny access, and `mcp_mock_expires_in` on the token endpoint issues tokens that expire when the test wants them to.
   - The official SDK runs the whole flow against it, on modern and legacy connections.
 
-### Fixed
-
-- JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.
-
-[Unreleased]: https://github.com/axium-lab/mcp-mock/commits/main
+[Unreleased]: https://github.com/axium-lab/mcp-mock/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/axium-lab/mcp-mock/releases/tag/v0.1.0

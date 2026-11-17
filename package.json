@@ -1,6 +1,6 @@
 {
   "name": "mcp-mock",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Mock MCP server for integration tests: point your MCP client at it, keep your code",
   "type": "module",
