@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>mcp-mock — A mock MCP server for integration tests</title>
-<meta name="description" content="A mock Model Context Protocol server for integration tests. Every spec revision from 2024-11-05 to 2026-07-28, deterministic tools, and answers, errors and HTTP failures forced from the request itself. Open source, by Axium." />
+<meta name="description" content="A mock Model Context Protocol server for integration tests. Every spec revision from 2024-11-05 to 2026-07-28, deterministic tools, and answers, errors and HTTP failures forced from the request itself. Free public instance at public.mcp-mock.com, open source, by Axium." />
 <link rel="canonical" href="https://mcp-mock.com/" />
 <meta name="theme-color" content="#0b0e14" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%235b7cfa'/><text x='16' y='23' font-family='monospace' font-size='16' font-weight='700' fill='%23ffffff' text-anchor='middle'>{}</text></svg>" />
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="mcp-mock" />
 <meta property="og:locale" content="en_US" />
 <meta property="og:title" content="mcp-mock — A mock MCP server for integration tests" />
-<meta property="og:description" content="Point your MCP client at it, keep your code. Every spec revision from 2024-11-05 to 2026-07-28, deterministic tools, forced answers and failures. Open source, by Axium." />
+<meta property="og:description" content="Point your MCP client at it, keep your code. Every spec revision from 2024-11-05 to 2026-07-28, deterministic tools, forced answers and failures. Free public instance, open source, by Axium." />
 <meta property="og:url" content="https://mcp-mock.com/" />
 <meta property="og:image" content="https://mcp-mock.com/og-image.png" />
 <meta property="og:image:width" content="1200" />
@@ -22,7 +22,7 @@
 <meta property="og:image:alt" content="mcp-mock — test your MCP client against every spec revision. A mock Model Context Protocol server: 2024-11-05 to 2026-07-28, deterministic tools, OAuth, tasks and streaming." />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="mcp-mock — A mock MCP server for integration tests" />
-<meta name="twitter:description" content="Point your MCP client at it, keep your code. Every spec revision from 2024-11-05 to 2026-07-28, deterministic tools, forced answers and failures. Open source." />
+<meta name="twitter:description" content="Point your MCP client at it, keep your code. Every spec revision from 2024-11-05 to 2026-07-28, deterministic tools, forced answers and failures. Free public instance, open source." />
 <meta name="twitter:image" content="https://mcp-mock.com/og-image.png" />
 
 <!-- Structured data -->
@@ -221,7 +221,7 @@
 
 <header>
   <div class="wrap">
-    <span class="eyebrow">open source · MIT</span>
+    <span class="eyebrow">open source · MIT · free public instance</span>
     <h1>Test your MCP client<br /><span class="hl">against every spec revision</span></h1>
     <p class="sub">
       A mock <a href="https://modelcontextprotocol.io">Model Context Protocol</a> server for integration tests,
@@ -229,13 +229,16 @@
       Deterministic tools, and any answer, error or HTTP failure forced from the request itself.
       Point your client at it, keep your code.
     </p>
+    <p class="sub"><strong>Zero install:</strong> a free public instance runs at
+      <a href="https://public.mcp-mock.com/health"><code>public.mcp-mock.com</code></a>.
+      Point your client there and start in seconds — no download, no signup.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/axium-lab/mcp-mock">★ Star on GitHub</a>
       <a class="btn btn-ghost" href="https://github.com/axium-lab/mcp-mock/pkgs/container/mcp-mock">Docker image</a>
     </div>
     <div class="cmd">
-      <code><span class="prompt">$</span>docker run --rm -p 3000:3000 ghcr.io/axium-lab/mcp-mock:0.1.0</code>
-      <button class="copy-btn" data-cmd="docker run --rm -p 3000:3000 ghcr.io/axium-lab/mcp-mock:0.1.0">Copy</button>
+      <code><span class="prompt">URL</span>https://public.mcp-mock.com/mcp</code>
+      <button class="copy-btn" data-cmd="https://public.mcp-mock.com/mcp">Copy</button>
     </div>
   </div>
 </header>
@@ -243,21 +246,21 @@
 <section id="start">
   <div class="wrap">
     <h2>Get started</h2>
-    <p class="section-sub">One command to run it, one URL to point your client at.</p>
+    <p class="section-sub">Nothing to install: one URL to point your client at. Or run your own with one command.</p>
 
     <div class="hosted-card">
-      <span class="eyebrow">⚡ One URL, any client</span>
-      <h3>Point your client at <code style="font-size:0.85em">/mcp</code></h3>
-      <p>The root endpoint serves any client without configuration: a modern 2026-07-28 request is served as 2026-07-28, a legacy <code>initialize</code> as the revision it negotiates. No session, no handshake to set up.</p>
+      <span class="eyebrow">⚡ Zero install · free public instance</span>
+      <h3>Use <code style="font-size:0.85em">public.mcp-mock.com</code>, free</h3>
+      <p>A free hosted instance is open to everyone: no download, no signup, no API key. Point your client at its <code>/mcp</code> endpoint and start in seconds. The root endpoint serves any client without configuration: a modern 2026-07-28 request is served as 2026-07-28, a legacy <code>initialize</code> as the revision it negotiates. No session, no handshake to set up.</p>
       <div class="cmd">
-        <code><span class="prompt">URL</span>http://localhost:3000/mcp</code>
-        <button class="copy-btn" data-cmd="http://localhost:3000/mcp">Copy</button>
+        <code><span class="prompt">URL</span>https://public.mcp-mock.com/mcp</code>
+        <button class="copy-btn" data-cmd="https://public.mcp-mock.com/mcp">Copy</button>
       </div>
       <p style="margin: 14px 0 0;">Need to pin a revision? Each one has its own endpoint, like <code>/2026-07-28/mcp</code> or <code>/2024-11-05/sse</code>, and everything is served again behind OAuth under <code>/protected/</code>.</p>
     </div>
 
-    <h3 class="selfhost">Run it your way</h3>
-    <p class="section-sub">Multi-arch image on GHCR (<code>linux/amd64</code>, <code>linux/arm64</code>), or from source with <a href="https://bun.sh">Bun</a> — or Node 22.18+.</p>
+    <h3 class="selfhost">Or run your own</h3>
+    <p class="section-sub">For CI, offline work, or to pin an exact release: multi-arch image on GHCR (<code>linux/amd64</code>, <code>linux/arm64</code>), or from source with <a href="https://bun.sh">Bun</a> — or Node 22.18+.</p>
 <pre><code><span class="tok-com"># Docker — pin the exact release in CI</span>
 docker run --rm -p 3000:3000 ghcr.io/axium-lab/mcp-mock:0.1.0
 
@@ -280,7 +283,7 @@ bun start            <span class="tok-com"># or: npm install &amp;&amp; npm run 
 
 <span class="tok-key">const</span> client = <span class="tok-key">new</span> <span class="tok-fn">Client</span>({ name: <span class="tok-str">"my-app"</span>, version: <span class="tok-str">"1.0.0"</span> });
 <span class="tok-key">await</span> client.<span class="tok-fn">connect</span>(
-  <span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"http://localhost:3000/mcp"</span>)), <span class="tok-com">// the only change</span>
+  <span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"https://public.mcp-mock.com/mcp"</span>)), <span class="tok-com">// the only change</span>
 );
 
 <span class="tok-key">const</span> result = <span class="tok-key">await</span> client.<span class="tok-fn">callTool</span>({ name: <span class="tok-str">"get_weather"</span>, arguments: { city: <span class="tok-str">"Madrid"</span> } });
@@ -293,7 +296,7 @@ bun start            <span class="tok-com"># or: npm install &amp;&amp; npm run 
   _meta: { <span class="tok-str">"com.mcp-mock/response"</span>: { structuredContent: { city: <span class="tok-str">"Madrid"</span>, temperature: <span class="tok-str">40</span> } } },
 });</code></pre>
     <p class="section-sub" style="margin: 22px 0 0;">And when it needs the server to fall over, a header does it — on any endpoint and transport:</p>
-<pre><code>curl -i http://localhost:3000/mcp -H <span class="tok-str">"x-mcp-mock-status: 429"</span> …
+<pre><code>curl -i https://public.mcp-mock.com/mcp -H <span class="tok-str">"x-mcp-mock-status: 429"</span> …
 <span class="tok-com"># HTTP/1.1 429 Too Many Requests</span>
 <span class="tok-com"># Retry-After: 1</span></code></pre>
   </div>
@@ -342,7 +345,7 @@ bun start            <span class="tok-com"># or: npm install &amp;&amp; npm run 
       </div>
       <div class="feature">
         <h3>Zero setup</h3>
-        <p>One Docker command, or <code>bun install &amp;&amp; bun start</code>. A <code>/health</code> endpoint reports the running version.</p>
+        <p>Use the free public instance at <code>public.mcp-mock.com</code>, or run your own with one Docker command. A <code>/health</code> endpoint reports the running version.</p>
       </div>
     </div>
   </div>

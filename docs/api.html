@@ -70,7 +70,7 @@
       mcp-mock speaks the Model Context Protocol in every revision from 2024-11-05 to 2026-07-28 —
       same transports, same messages, same error codes — with deterministic tools and answers
       the test controls from the request itself. This page covers the endpoints and the controls;
-      the catalog, the revisions and OAuth have their own pages.
+      the catalog, the revisions and OAuth have their own pages. Every example runs as is against the free public instance at <code>public.mcp-mock.com</code>.
     </p>
   </div>
 </header>
@@ -112,7 +112,12 @@
 
     <section id="endpoints">
       <h2>Endpoints</h2>
-      <p class="section-sub">Every endpoint lives on the same server, on port <code>3000</code> by default.</p>
+      <p class="section-sub">Every endpoint lives on the same server: the free public instance at <code>https://public.mcp-mock.com</code>, or your own, on port <code>3000</code> by default.</p>
+      <div class="callout">
+        <strong>Zero install:</strong> a free public instance runs at <a href="https://public.mcp-mock.com/health"><code>public.mcp-mock.com</code></a>,
+        and every example on these pages points at it. No download, no signup, no API key. To run your own, see
+        <a href="#docker">Docker &amp; configuration</a> and swap the host for <code>http://localhost:3000</code>.
+      </div>
       <table>
         <thead><tr><th>URL</th><th>Serves</th></tr></thead>
         <tbody>
@@ -138,7 +143,7 @@
 <pre><code><span class="tok-key">import</span> { Client, StreamableHTTPClientTransport } <span class="tok-key">from</span> <span class="tok-str">"@modelcontextprotocol/client"</span>;
 
 <span class="tok-key">const</span> client = <span class="tok-key">new</span> <span class="tok-fn">Client</span>({ name: <span class="tok-str">"my-app"</span>, version: <span class="tok-str">"1.0.0"</span> });
-<span class="tok-key">await</span> client.<span class="tok-fn">connect</span>(<span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"http://localhost:3000/mcp"</span>)));
+<span class="tok-key">await</span> client.<span class="tok-fn">connect</span>(<span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"https://public.mcp-mock.com/mcp"</span>)));
 
 <span class="tok-key">const</span> { tools } = <span class="tok-key">await</span> client.<span class="tok-fn">listTools</span>();           <span class="tok-com">// 22 tools, always in the same order</span>
 <span class="tok-key">const</span> sum = <span class="tok-key">await</span> client.<span class="tok-fn">callTool</span>({ name: <span class="tok-str">"add"</span>, arguments: { a: <span class="tok-str">2</span>, b: <span class="tok-str">3</span> } });</code></pre>
@@ -150,9 +155,9 @@
 <span class="tok-key">new</span> <span class="tok-fn">Client</span>(info, { versionNegotiation: { mode: <span class="tok-str">"legacy"</span> }, supportedProtocolVersions: [<span class="tok-str">"2025-06-18"</span>] });
 
 <span class="tok-com">// 2024-11-05 travels over the deprecated HTTP+SSE transport</span>
-<span class="tok-key">await</span> client.<span class="tok-fn">connect</span>(<span class="tok-key">new</span> <span class="tok-fn">SSEClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"http://localhost:3000/2024-11-05/sse"</span>)));</code></pre>
+<span class="tok-key">await</span> client.<span class="tok-fn">connect</span>(<span class="tok-key">new</span> <span class="tok-fn">SSEClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"https://public.mcp-mock.com/2024-11-05/sse"</span>)));</code></pre>
       <p>Clients that connect as legacy by default, like the MCP Inspector, work unchanged against <code>/mcp</code> or any legacy endpoint. On the wire, a 2026-07-28 request is plain JSON-RPC with its envelope in <code>_meta</code>:</p>
-<pre><code>curl http://localhost:3000/mcp \
+<pre><code>curl https://public.mcp-mock.com/mcp \
   -H <span class="tok-str">"content-type: application/json"</span> -H <span class="tok-str">"accept: application/json, text/event-stream"</span> \
   -H <span class="tok-str">"MCP-Protocol-Version: 2026-07-28"</span> -H <span class="tok-str">"Mcp-Method: tools/call"</span> -H <span class="tok-str">"Mcp-Name: get_weather"</span> \
   -d <span class="tok-str">'{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{
@@ -229,7 +234,7 @@
     <section id="chaos">
       <h2>Provoking HTTP failures</h2>
       <p class="section-sub">A retry loop, a circuit breaker or a fallback is only tested once the server has actually failed. <code>x-mcp-mock-status</code> makes it fail on demand: any status from <code>400</code> to <code>599</code>, on every endpoint and transport.</p>
-<pre><code>curl -i http://localhost:3000/mcp -H <span class="tok-str">"x-mcp-mock-status: 429"</span> \
+<pre><code>curl -i https://public.mcp-mock.com/mcp -H <span class="tok-str">"x-mcp-mock-status: 429"</span> \
   -H <span class="tok-str">"content-type: application/json"</span> -H <span class="tok-str">"accept: application/json, text/event-stream"</span> \
   -d <span class="tok-str">'{"jsonrpc":"2.0","id":1,"method":"tools/list"}'</span>
 
@@ -238,7 +243,7 @@
 <span class="tok-com">#</span>
 <span class="tok-com"># {"jsonrpc":"2.0","id":null,"error":{"code":-32000,"message":"Too Many Requests: rate limit reached."}}</span></code></pre>
       <p>With the TypeScript SDK, pass the header through the transport's request options, or wrap its <code>fetch</code> to add it only on the calls that should fail:</p>
-<pre><code><span class="tok-key">const</span> transport = <span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"http://localhost:3000/mcp"</span>), {
+<pre><code><span class="tok-key">const</span> transport = <span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(<span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"https://public.mcp-mock.com/mcp"</span>), {
   requestInit: { headers: { <span class="tok-str">"x-mcp-mock-status"</span>: <span class="tok-str">"503"</span> } },
 });</code></pre>
       <table>

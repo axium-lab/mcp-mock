@@ -6,9 +6,28 @@
 
 mcp-mock speaks the [Model Context Protocol](https://modelcontextprotocol.io) faithfully enough that the official SDKs cannot tell it from a real server, in every spec revision from 2024-11-05 to 2026-07-28. Its tools return deterministic, believable data, and a test can force any answer, error or HTTP failure from the request itself, with nothing to register beforehand.
 
+> **⚡ Zero install**: a free public instance runs at **[`public.mcp-mock.com`](https://public.mcp-mock.com/health)**. Point your MCP client at `https://public.mcp-mock.com/mcp` and start in seconds; no download, no signup, no API key.
+
 From the team behind [llm-mock](https://github.com/axium-lab/llm-mock).
 
 ## Quick start
+
+Point your client at the free public instance, `https://public.mcp-mock.com/mcp`:
+
+```ts
+import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
+
+const client = new Client({ name: "my-app", version: "1.0.0" });
+await client.connect(new StreamableHTTPClientTransport(new URL("https://public.mcp-mock.com/mcp")));
+
+const result = await client.callTool({ name: "get_weather", arguments: { city: "Madrid" } });
+// result.structuredContent → { city: "Madrid", temperature: 14, conditions: "thunderstorm", … }
+// Same call, same bytes, every time, on any machine.
+```
+
+### Run your own
+
+For CI, offline work, or to pin an exact release, run it yourself and use `http://localhost:3000/mcp` instead:
 
 ```bash
 docker run --rm -p 3000:3000 ghcr.io/axium-lab/mcp-mock:0.1.0
@@ -21,20 +40,9 @@ bun install
 bun start            # or, without Bun: npm install && npm run start:node (Node 22.18+)
 ```
 
-Then point your client at `http://localhost:3000/mcp`:
-
-```ts
-import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
-
-const client = new Client({ name: "my-app", version: "1.0.0" });
-await client.connect(new StreamableHTTPClientTransport(new URL("http://localhost:3000/mcp")));
-
-const result = await client.callTool({ name: "get_weather", arguments: { city: "Madrid" } });
-// result.structuredContent → { city: "Madrid", temperature: 14, conditions: "thunderstorm", … }
-// Same call, same bytes, every time, on any machine.
-```
-
 ## Endpoints
+
+Every endpoint is served on the public instance, `https://public.mcp-mock.com`, and on your own (`http://localhost:3000` by default).
 
 | URL | Serves |
 | --- | --- |
