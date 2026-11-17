@@ -42,7 +42,7 @@ describe("2024-11-05 over raw HTTP+SSE", () => {
     const body = JSON.parse(message.data);
     expect(body.result).toEqual({
       protocolVersion: REVISION,
-      capabilities: { tools: {}, resources: {}, prompts: {} },
+      capabilities: { tools: {}, resources: { subscribe: true }, prompts: {} },
       serverInfo: { name: "mcp-mock", version: "0.0.0" },
     });
     expect(validateMessage(REVISION, body)).toEqual({ valid: true, errors: [] });

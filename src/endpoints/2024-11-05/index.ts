@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import express, { type Request, type Response, Router } from "express";
-import { CONTROL, forcedStatus } from "../../core/control.ts";
-import { dispatch, parseJson, parseMessage } from "../../core/jsonrpc.ts";
+import { CONTROL, forcedStatus, notificationScript, withControl } from "../../core/control.ts";
+import { dispatch, ErrorCode, type Handlers, JsonRpcError, parseJson, parseMessage } from "../../core/jsonrpc.ts";
+import { readResource } from "../../resources/index.ts";
 import { progressNotification, progressTokenOf } from "../../core/progress.ts";
 import type { Progress } from "../../tools/types.ts";
 import { PROFILE_2025_03_26 } from "../2025-03-26/index.ts";
+import type { LegacyContext } from "../2025-11-25/handlers.ts";
 import { answerBatch, handlersFor, profileFor } from "../2025-11-25/index.ts";
 import type { LegacyProfile } from "../2025-11-25/profile.ts";
 import type { Endpoint } from "../types.ts";
@@ -50,6 +52,8 @@ interface SseSession {
   stream: Response;
   // Requests still running, so notifications/cancelled can abort them.
   inflight: Map<string | number, AbortController>;
+  // Subscribed resources, with the timers of their scripted updates.
+  subscriptions: Map<string, ReturnType<typeof setTimeout>[]>;
   // Set by initialize. Sessions are the one place a negotiated version can be
   // remembered, so it is: until then, the transport's own revision applies.
   profile?: LegacyProfile;
@@ -58,6 +62,52 @@ interface SseSession {
 function event(stream: Response, name: string, data: string): void {
   stream.write(`event: ${name}\ndata: ${data}\n\n`);
 }
+
+function stopUpdates(session: SseSession, uri: string): void {
+  for (const timer of session.subscriptions.get(uri) ?? []) clearTimeout(timer);
+  session.subscriptions.delete(uri);
+}
+
+// resources/subscribe and resources/unsubscribe, which only this transport
+// serves among the legacy ones: its session stream is the one place a
+// legacy resources/updated can be delivered. The resource never changes on
+// its own; _meta["com.mcp-mock/notifications"] scripts the updates a test
+// wants, and only updates of the subscribed resource are allowed.
+function subscriptionHandlers(session: SseSession): Handlers<LegacyContext> {
+  return withControl({
+    requests: {
+      "resources/subscribe": (params) => {
+        const uri = params?.uri;
+        if (typeof uri !== "string") throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "uri" must be a string');
+        readResource({ uri }, RESOURCE_NOT_FOUND);
+        const script = notificationScript(params);
+        if (script?.events.some((scripted) => scripted.kind !== "resourceUpdated" || scripted.uri !== uri)) {
+          throw new JsonRpcError(
+            ErrorCode.InvalidParams,
+            `Invalid params: _meta ${CONTROL.notifications} may only announce updates of ${uri} here`,
+          );
+        }
+        stopUpdates(session, uri);
+        const timers = (script?.events ?? []).map((_, index) =>
+          setTimeout(
+            () =>
+              event(session.stream, "message", JSON.stringify({ jsonrpc: "2.0", method: "notifications/resources/updated", params: { uri } })),
+            (script?.intervalMs ?? 0) * (index + 1),
+          ),
+        );
+        session.subscriptions.set(uri, timers);
+        return {};
+      },
+      "resources/unsubscribe": (params) => {
+        if (typeof params?.uri === "string") stopUpdates(session, params.uri);
+        return {};
+      },
+    },
+  });
+}
+
+// Resource not found in the legacy revisions.
+const RESOURCE_NOT_FOUND = -32002;
 
 // `profiles` (newest first) are the revisions initialize may negotiate. The
 // pinned endpoint offers only 2024-11-05; the root /sse of the dual-era
@@ -77,8 +127,12 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
       Connection: "keep-alive",
       "X-Accel-Buffering": "no",
     });
-    sessions.set(sessionId, { stream: res, inflight: new Map() });
-    req.on("close", () => sessions.delete(sessionId));
+    const session: SseSession = { stream: res, inflight: new Map(), subscriptions: new Map() };
+    sessions.set(sessionId, session);
+    req.on("close", () => {
+      for (const uri of [...session.subscriptions.keys()]) stopUpdates(session, uri);
+      sessions.delete(sessionId);
+    });
     event(res, "endpoint", `${req.baseUrl}/messages?sessionId=${sessionId}`);
   });
 
@@ -137,7 +191,9 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
       const cancel = new AbortController();
       session.inflight.set(id, cancel);
       const token = progressTokenOf(parsed.message.params);
-      const response = await dispatch(parsed.message, handlersFor(served), {
+      const { method } = parsed.message;
+      const subscription = method === "resources/subscribe" || method === "resources/unsubscribe";
+      let response = await dispatch(parsed.message, subscription ? subscriptionHandlers(session) : handlersFor(served), {
         ...(token !== undefined && {
           report: (update: Progress) =>
             event(session.stream, "message", JSON.stringify(progressNotification(token, update, served.progressMessages))),
@@ -145,6 +201,11 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
         signal: cancel.signal,
       });
       session.inflight.delete(id);
+      // This transport can deliver resource updates, so it says so.
+      if (method === "initialize" && response && "result" in response) {
+        const capabilities = response.result.capabilities as Record<string, unknown>;
+        response = { ...response, result: { ...response.result, capabilities: { ...capabilities, resources: { subscribe: true } } } };
+      }
       // A cancelled request gets no response.
       if (!cancel.signal.aborted) event(session.stream, "message", JSON.stringify(response));
     })().catch(next);

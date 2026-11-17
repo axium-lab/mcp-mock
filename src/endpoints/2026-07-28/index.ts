@@ -4,6 +4,7 @@ import { progressNotification, progressTokenOf } from "../../core/progress.ts";
 import type { Endpoint } from "../types.ts";
 import { classify } from "./classify.ts";
 import { McpErrorCode } from "./errors.ts";
+import { serveListen } from "./listen.ts";
 import { handlers, REVISION } from "./handlers.ts";
 import {
   bodyErrorHandler,
@@ -32,7 +33,7 @@ export async function serveModern(body: unknown, req: Request, res: Response): P
     },
     {
       supportedVersions: MODERN_VERSIONS,
-      isKnownMethod: (method) => Object.hasOwn(handlers.requests, method),
+      isKnownMethod: (method) => method === "subscriptions/listen" || Object.hasOwn(handlers.requests, method),
     },
   );
 
@@ -41,6 +42,8 @@ export async function serveModern(body: unknown, req: Request, res: Response): P
     res.status(202).end();
     return;
   }
+  // A long-lived stream rather than a request with one answer.
+  if (classified.message.method === "subscriptions/listen") return serveListen(classified.message, res);
 
   const reply = responder(res);
   const token = progressTokenOf(classified.message.params);

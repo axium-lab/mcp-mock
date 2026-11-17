@@ -71,7 +71,11 @@ describe("2026-07-28 over raw HTTP", () => {
       expect(reply.headers.get("content-type")).toContain("application/json");
       expect(reply.body.result).toEqual({
         supportedVersions: [REVISION],
-        capabilities: { tools: {}, resources: {}, prompts: {} },
+        capabilities: {
+          tools: { listChanged: true },
+          resources: { listChanged: true, subscribe: true },
+          prompts: { listChanged: true },
+        },
         ttlMs: 3_600_000,
         cacheScope: "public",
         resultType: "complete",

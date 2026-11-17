@@ -32,10 +32,16 @@ function complete(result: object): Record<string, unknown> {
 // withControl lets a request force a JSON-RPC error from the test.
 export const handlers: Handlers<RequestContext> = withControl({
   requests: {
+    // listChanged and subscribe: subscriptions/listen honors every list and
+    // resource subscription (the changes themselves are scripted by tests).
     "server/discover": () =>
       complete({
         supportedVersions: [REVISION],
-        capabilities: { tools: {}, resources: {}, prompts: {} },
+        capabilities: {
+          tools: { listChanged: true },
+          resources: { listChanged: true, subscribe: true },
+          prompts: { listChanged: true },
+        },
         ...CACHE_HINTS,
       }),
 

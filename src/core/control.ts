@@ -16,6 +16,7 @@ export const CONTROL = {
   response: "com.mcp-mock/response",
   error: "com.mcp-mock/error",
   inputRequired: "com.mcp-mock/input-required",
+  notifications: "com.mcp-mock/notifications",
   statusHeader: "x-mcp-mock-status",
 } as const;
 
@@ -117,6 +118,48 @@ export function forcedInputRequired(
     ...(inputRequests !== undefined && { inputRequests: inputRequests as Record<string, Record<string, unknown>> }),
     ...(requestState !== undefined && { requestState: requestState as string }),
   };
+}
+
+// A change the script of a notification stream announces: a list that
+// changed, or a resource that was updated.
+export type ScriptedEvent =
+  | { kind: "toolsListChanged" | "promptsListChanged" | "resourcesListChanged" }
+  | { kind: "resourceUpdated"; uri: string };
+
+export interface NotificationScript {
+  events: ScriptedEvent[];
+  // Milliseconds before each event.
+  intervalMs: number;
+  // Whether the server ends the stream gracefully after the last event.
+  close: boolean;
+}
+
+const LIST_EVENTS = ["toolsListChanged", "promptsListChanged", "resourcesListChanged"] as const;
+
+// The notifications a stream must deliver, from its opening request: the
+// catalog never changes on its own, so a test scripts the changes it wants
+// its client to see. Undefined when the request scripts none.
+export function notificationScript(params: Record<string, unknown> | undefined): NotificationScript | undefined {
+  const value = controlOf(params, CONTROL.notifications);
+  if (value === undefined) return undefined;
+  const key = CONTROL.notifications;
+  if (!isObject(value)) throw invalid(key, "expected an object");
+  const { events, intervalMs = 10, close = false } = value;
+  if (!Array.isArray(events)) throw invalid(key, '"events" must be an array');
+  if (!Number.isInteger(intervalMs) || (intervalMs as number) < 0 || (intervalMs as number) > 60_000) {
+    throw invalid(key, '"intervalMs" must be an integer from 0 to 60000');
+  }
+  if (typeof close !== "boolean") throw invalid(key, '"close" must be a boolean');
+  const parsed = events.map((event): ScriptedEvent => {
+    if (typeof event === "string" && (LIST_EVENTS as readonly string[]).includes(event)) {
+      return { kind: event as (typeof LIST_EVENTS)[number] };
+    }
+    if (isObject(event) && typeof event.resourceUpdated === "string") {
+      return { kind: "resourceUpdated", uri: event.resourceUpdated };
+    }
+    throw invalid(key, `each event must be one of ${LIST_EVENTS.join(", ")} or { "resourceUpdated": "<uri>" }`);
+  });
+  return { events: parsed, intervalMs: intervalMs as number, close };
 }
 
 // Throws the JSON-RPC error a request forces, if any.
