@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tools, resources &amp; prompts — mcp-mock</title>
+<meta name="description" content="The mcp-mock catalog: 22 deterministic tools with their arguments, results and failure values, four fake files and three URI templates, and three prompts — served by every spec revision." />
+<link rel="canonical" href="https://mcp-mock.com/api-catalog.html" />
+<meta name="theme-color" content="#0b0e14" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%235b7cfa'/><text x='16' y='23' font-family='monospace' font-size='16' font-weight='700' fill='%23ffffff' text-anchor='middle'>{}</text></svg>" />
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="mcp-mock" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:title" content="mcp-mock — Tools, resources &amp; prompts" />
+<meta property="og:description" content="22 deterministic tools with their arguments, results and failure values, four fake files and three URI templates, and three prompts." />
+<meta property="og:url" content="https://mcp-mock.com/api-catalog.html" />
+<meta property="og:image" content="https://mcp-mock.com/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="mcp-mock — test your MCP client against every spec revision. A mock Model Context Protocol server: 2024-11-05 to 2026-07-28, deterministic tools, OAuth, tasks and streaming." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="mcp-mock — Tools, resources &amp; prompts" />
+<meta name="twitter:description" content="22 deterministic tools with their arguments, results and failure values, four fake files and three URI templates, and three prompts." />
+<meta name="twitter:image" content="https://mcp-mock.com/og-image.png" />
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "mcp-mock — Tools, resources & prompts",
+  "description": "22 deterministic tools with their arguments, results and failure values, four fake files and three URI templates, and three prompts.",
+  "url": "https://mcp-mock.com/api-catalog.html",
+  "author": { "@type": "Organization", "name": "Axium", "url": "https://axium-lab.com" },
+  "about": { "@type": "SoftwareApplication", "name": "mcp-mock", "url": "https://mcp-mock.com/" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mcp-mock.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://mcp-mock.com/api.html" },
+    { "@type": "ListItem", "position": 3, "name": "Tools, resources & prompts", "item": "https://mcp-mock.com/api-catalog.html" }
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><a href="index.html">mcp<span>-</span>mock</a></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a class="active" href="api.html">Docs</a>
+      <a class="gh" href="https://github.com/axium-lab/mcp-mock">GitHub ↗</a>
+    </div>
+  </nav>
+</div>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow"><a href="api.html">Docs</a> / Catalog</span>
+    <h1>Tools, resources &amp; prompts</h1>
+    <p class="sub">
+      What every endpoint serves, in every revision: 22 tools, four files and three URI templates,
+      and three prompts — all deterministic, all drawn from the same fake world, each with a documented
+      way to fail.
+    </p>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="layout">
+  <aside class="toc">
+    <p class="toc-title">On this page</p>
+    <p class="toc-group">Tools</p>
+    <ul>
+      <li><a href="#determinism">Determinism</a></li>
+      <li><a href="#computations">Real computations</a></li>
+      <li><a href="#world">Fake world</a></li>
+      <li><a href="#failures">Failing on purpose</a></li>
+      <li><a href="#content">Content types</a></li>
+    </ul>
+    <p class="toc-group">More</p>
+    <ul>
+      <li><a href="#resources">Resources</a></li>
+      <li><a href="#prompts">Prompts</a></li>
+    </ul>
+    <p class="toc-group">Docs</p>
+    <ul>
+      <li><a href="api.html">Overview</a></li>
+      <li><a href="api-revisions.html">Spec revisions</a></li>
+      <li><a href="api-oauth.html">OAuth</a></li>
+    </ul>
+  </aside>
+
+  <main>
+    <section id="determinism">
+      <h2>Determinism</h2>
+      <p class="section-sub"><code>tools/list</code> returns the 22 tools in the same order on every revision. Real computations compute; fake-world tools derive their data from a hash of the normalized arguments.</p>
+      <p>The same call always returns the same bytes, on Bun and on Node, on any machine. Different calls return different but <strong>internally consistent</strong> data: metric and imperial agree, currency conversions round-trip, a 3-day forecast is the start of the 7-day one, and <code>weather://Madrid</code> reads what <code>get_weather</code> reports for Madrid.</p>
+      <p>Arguments are normalized before hashing and matching: <code>" madrid "</code> and <code>"Madrid"</code> are the same city, <code>"eur"</code> and <code>"EUR"</code> the same currency.</p>
+<pre><code><span class="tok-key">await</span> client.<span class="tok-fn">callTool</span>({ name: <span class="tok-str">"get_weather"</span>, arguments: { city: <span class="tok-str">"Madrid"</span> } });
+<span class="tok-com">// structuredContent: { city: "Madrid", temperature: 14, temperature_unit: "°C",</span>
+<span class="tok-com">//   conditions: "thunderstorm", humidity: 42, wind_speed: 55, wind_speed_unit: "km/h" }</span>
+
+<span class="tok-key">await</span> client.<span class="tok-fn">callTool</span>({ name: <span class="tok-str">"get_weather"</span>, arguments: { city: <span class="tok-str">" madrid "</span>, units: <span class="tok-str">"imperial"</span> } });
+<span class="tok-com">// structuredContent: { city: "Madrid", temperature: 57.2, temperature_unit: "°F",</span>
+<span class="tok-com">//   conditions: "thunderstorm", humidity: 42, wind_speed: 34.2, wind_speed_unit: "mph" }</span></code></pre>
+      <div class="callout">
+        Arguments that break a tool's input schema are a <strong>tool execution error</strong> (<code>isError: true</code>)
+        from 2025-11-25 on, and a JSON-RPC <code>-32602</code> protocol error before it — as each revision's spec lists them.
+        An unknown tool is <code>-32602</code> everywhere.
+      </div>
+    </section>
+
+    <section id="computations">
+      <h2>Real computations</h2>
+      <p class="section-sub">Eleven tools that actually compute their answer. All are read-only and idempotent.</p>
+      <table>
+        <thead><tr><th>Tool</th><th>Arguments</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td><code>echo</code></td><td><code>text</code></td><td>The text prefixed with <code>"Echo: "</code>, as a text block</td></tr>
+          <tr><td><code>add</code></td><td><code>a</code>, <code>b</code> (numbers)</td><td><code>{ sum }</code></td></tr>
+          <tr><td><code>calculate</code></td><td><code>expression</code>, up to 1000 chars</td><td><code>{ result }</code>. A safe parser for <code>+ - * / % ^</code> and parentheses — no <code>eval</code></td></tr>
+          <tr><td><code>transform_text</code></td><td><code>text</code>, <code>operation</code>: <code>upper</code> · <code>lower</code> · <code>reverse</code> · <code>slug</code></td><td><code>{ result }</code></td></tr>
+          <tr><td><code>text_stats</code></td><td><code>text</code></td><td><code>{ words, chars, lines }</code></td></tr>
+          <tr><td><code>sort_list</code></td><td><code>items</code> (up to 1000 strings), <code>order</code>?: <code>asc</code> · <code>desc</code></td><td><code>{ items }</code>, sorted by code point</td></tr>
+          <tr><td><code>convert_units</code></td><td><code>value</code>, <code>from</code>, <code>to</code>: length (<code>mm cm m km in ft yd mi</code>), mass (<code>mg g kg oz lb</code>), time (<code>s min h d</code>), temperature (<code>c f k</code>)</td><td><code>{ value, unit }</code></td></tr>
+          <tr><td><code>hash_text</code></td><td><code>text</code>, <code>algorithm</code>: <code>md5</code> · <code>sha1</code> · <code>sha256</code></td><td><code>{ algorithm, hex }</code></td></tr>
+          <tr><td><code>date_diff</code></td><td><code>from</code>, <code>to</code>: <code>YYYY-MM-DD</code> (UTC) or date-times with an offset</td><td><code>{ days, hours, seconds }</code></td></tr>
+          <tr><td><code>color_swatch</code></td><td><code>color</code>: <code>#rgb</code>, <code>#rrggbb</code> or a name; <code>size</code>?: 1–64 px, default 16</td><td>A real PNG, as an <code>image</code> block</td></tr>
+          <tr><td><code>simulate_work</code></td><td><code>steps</code>?: 1–20, default 5; <code>step_ms</code>?: 0–2000, default 100</td><td><code>{ steps, completed }</code>, after really waiting between steps</td></tr>
+        </tbody>
+      </table>
+      <p><code>simulate_work</code> is the tool for everything that takes time: it sends <code>notifications/progress</code> on each step when the request carries a <code>progressToken</code>, it can be cancelled, it runs as a task for clients that declare the tasks extension, and a long <code>step_ms</code> lets a test exercise its client's timeout. See <a href="api-revisions.html#progress">Progress &amp; cancellation</a>.</p>
+    </section>
+
+    <section id="world">
+      <h2>Fake world</h2>
+      <p class="section-sub">Eleven tools that look up a world that doesn't exist, believably. Annotations tell the read-only lookups from the two that act: <code>send_email</code> and <code>delete_file</code>.</p>
+      <table>
+        <thead><tr><th>Tool</th><th>Arguments</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td><code>get_weather</code></td><td><code>city</code>, <code>units</code>?: <code>metric</code> · <code>imperial</code></td><td><code>{ city, temperature, temperature_unit, conditions, humidity, wind_speed, wind_speed_unit }</code></td></tr>
+          <tr><td><code>get_forecast</code></td><td><code>city</code>, <code>days</code>: 1–7, <code>units</code>?</td><td><code>{ city, temperature_unit, days: [{ day, high, low, conditions, precipitation_chance }] }</code>; day 1 is tomorrow</td></tr>
+          <tr><td><code>search_web</code></td><td><code>query</code>, <code>limit</code>?: 1–10, default 5</td><td><code>{ query, results: [{ title, url, snippet }] }</code> plus a <code>resource_link</code> per result, all under <code>example.com</code></td></tr>
+          <tr><td><code>get_stock_price</code></td><td><code>symbol</code>: 1–5 letters</td><td><code>{ symbol, price, currency, change, change_percent }</code></td></tr>
+          <tr><td><code>convert_currency</code></td><td><code>amount</code>, <code>from</code>, <code>to</code>: ISO 4217 codes</td><td><code>{ amount, from, to, rate, result }</code>; rates are consistent across pairs</td></tr>
+          <tr><td><code>get_user</code></td><td><code>user_id</code></td><td><code>{ id, name, email, role, created_at }</code></td></tr>
+          <tr><td><code>geocode</code></td><td><code>address</code></td><td><code>{ formatted_address, latitude, longitude }</code></td></tr>
+          <tr><td><code>get_flight_status</code></td><td><code>flight_number</code>: airline code + 1–4 digits, e.g. <code>IB3456</code></td><td><code>{ flight_number, status, departure_airport, arrival_airport, scheduled_departure, terminal, gate }</code></td></tr>
+          <tr><td><code>read_file</code></td><td><code>path</code>: absolute</td><td>The file as an embedded <code>resource</code>, its contents following the extension: <code>.json</code>, <code>.md</code>, <code>.csv</code>, anything else as plain text</td></tr>
+          <tr><td><code>delete_file</code></td><td><code>path</code>: absolute</td><td><code>{ path, deleted }</code>. Asks for confirmation first on 2026-07-28; nothing is really deleted</td></tr>
+          <tr><td><code>send_email</code></td><td><code>to</code>, <code>subject</code>, <code>body</code></td><td><code>{ message_id, to, status }</code>. Nothing is really sent</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <code>delete_file</code> on 2026-07-28 answers its first call with <code>input_required</code> and a form elicitation —
+        <em>“Delete /tmp/old.log? This cannot be undone.”</em> — and the retry completes or is cancelled according to the answer.
+        A client that does not declare form elicitation gets <code>-32021</code>. Legacy revisions, which cannot ask, delete without asking,
+        leaving the confirmation to the client as the <code>destructiveHint</code> annotation did in 2025.
+        See <a href="api-revisions.html#mrtr">Multi round-trip requests</a>.
+      </div>
+    </section>
+
+    <section id="failures">
+      <h2>Failing on purpose</h2>
+      <p class="section-sub">Each fake-world tool fails on one reserved value, so a test can reach every failure path without forcing anything. Failures are tool execution errors: <code>isError: true</code> with a message.</p>
+      <table>
+        <thead><tr><th>Tool</th><th>Fails with</th><th>Message</th></tr></thead>
+        <tbody>
+          <tr><td><code>get_weather</code>, <code>get_forecast</code></td><td><code>city: "Atlantis"</code></td><td>City not found: Atlantis</td></tr>
+          <tr><td><code>geocode</code></td><td><code>address: "Atlantis"</code></td><td>Address not found: Atlantis</td></tr>
+          <tr><td><code>search_web</code></td><td><code>query: "error"</code></td><td>Search failed: the search backend is unavailable</td></tr>
+          <tr><td><code>get_stock_price</code></td><td><code>symbol: "XXXX"</code></td><td>Unknown symbol: XXXX</td></tr>
+          <tr><td><code>convert_currency</code></td><td><code>from</code> or <code>to</code>: <code>"XXX"</code></td><td>Unsupported currency: XXX</td></tr>
+          <tr><td><code>get_user</code></td><td><code>user_id: "missing"</code></td><td>User not found: missing</td></tr>
+          <tr><td><code>get_flight_status</code></td><td><code>flight_number: "XX000"</code></td><td>Flight not found: XX000</td></tr>
+          <tr><td><code>read_file</code>, <code>delete_file</code></td><td><code>path: "/missing"</code></td><td>File not found: /missing — and any path with <code>..</code> is refused with <em>Access denied</em></td></tr>
+          <tr><td><code>send_email</code></td><td><code>to: "bounce@example.com"</code></td><td>Delivery failed: the mailbox bounce@example.com does not exist</td></tr>
+        </tbody>
+      </table>
+<pre><code><span class="tok-key">const</span> result = <span class="tok-key">await</span> client.<span class="tok-fn">callTool</span>({ name: <span class="tok-str">"get_weather"</span>, arguments: { city: <span class="tok-str">"Atlantis"</span> } });
+<span class="tok-com">// { content: [{ type: "text", text: "City not found: Atlantis" }], isError: true }</span></code></pre>
+      <p>For any other answer — a different error message, a protocol error, an HTTP failure — force it from the request. See <a href="api.html#control">Controlling answers</a>.</p>
+    </section>
+
+    <section id="content">
+      <h2>Content types</h2>
+      <p class="section-sub">Between them, the tools return every content type a <code>tools/call</code> result can carry, so a client's rendering of each one gets exercised.</p>
+      <table>
+        <thead><tr><th>Content</th><th>From</th></tr></thead>
+        <tbody>
+          <tr><td><code>text</code></td><td>Every tool. Tools with structured content repeat it as JSON text, as the spec asks.</td></tr>
+          <tr><td><code>structuredContent</code> + <code>outputSchema</code></td><td>Every tool except <code>echo</code>, <code>color_swatch</code> and <code>read_file</code></td></tr>
+          <tr><td><code>image</code></td><td><code>color_swatch</code> — a valid PNG, base64-encoded</td></tr>
+          <tr><td><code>resource_link</code></td><td><code>search_web</code>, one per result</td></tr>
+          <tr><td>embedded <code>resource</code></td><td><code>read_file</code></td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        Older revisions get the catalog in their own vocabulary. 2025-03-26 has no <code>outputSchema</code>, <code>structuredContent</code>
+        or <code>resource_link</code> — the JSON text block remains and <code>search_web</code>'s text keeps the URLs — and its
+        <code>title</code> moves into <code>annotations.title</code>. 2024-11-05 has neither annotations nor titles.
+      </div>
+    </section>
+
+    <section id="resources">
+      <h2>Resources</h2>
+      <p class="section-sub"><code>resources/list</code> serves four fake files, and <code>resources/templates/list</code> three templates over the same world as the tools.</p>
+      <table>
+        <thead><tr><th>URI</th><th>Type</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><code>file:///etc/app/config.json</code></td><td><code>application/json</code></td><td>The application's configuration file</td></tr>
+          <tr><td><code>file:///docs/README.md</code></td><td><code>text/markdown</code></td><td>The project's README</td></tr>
+          <tr><td><code>file:///data/report.csv</code></td><td><code>text/csv</code></td><td>A small CSV report of scores</td></tr>
+          <tr><td><code>file:///images/logo.png</code></td><td><code>image/png</code></td><td>A 16×16 PNG logo, read as a base64 <code>blob</code></td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>Template</th><th>Reads</th><th>Missing</th></tr></thead>
+        <tbody>
+          <tr><td><code>weather://{city}</code></td><td>The current weather, as <code>get_weather</code> reports it</td><td><code>weather://Atlantis</code></td></tr>
+          <tr><td><code>user://{user_id}</code></td><td>A user profile, as <code>get_user</code> reports it</td><td><code>user://missing</code></td></tr>
+          <tr><td><code>file:///{path}</code></td><td>Any file of the fake file system <code>read_file</code> serves</td><td><code>file:///missing</code></td></tr>
+        </tbody>
+      </table>
+<pre><code><span class="tok-key">await</span> client.<span class="tok-fn">readResource</span>({ uri: <span class="tok-str">"weather://Madrid"</span> });
+<span class="tok-com">// { contents: [{ uri: "weather://Madrid", mimeType: "application/json",</span>
+<span class="tok-com">//   text: "{\"city\":\"Madrid\",\"temperature\":14,…}" }] }</span></code></pre>
+      <div class="callout">
+        A missing resource is <code>-32002</code> up to 2025-11-25 and <code>-32602</code> from 2026-07-28, as each revision defines it.
+        On 2026-07-28 the list results and <code>resources/read</code> carry cache hints (<code>ttlMs</code>, <code>cacheScope</code>),
+        and <code>resources/read</code> requires the <code>Mcp-Name</code> header. Subscriptions to these resources are covered in
+        <a href="api-revisions.html#subscriptions">Subscriptions</a>.
+      </div>
+    </section>
+
+    <section id="prompts">
+      <h2>Prompts</h2>
+      <p class="section-sub"><code>prompts/list</code> and <code>prompts/get</code> serve three prompts. Unknown prompts and missing, unknown or non-string arguments are <code>-32602</code>.</p>
+      <table>
+        <thead><tr><th>Prompt</th><th>Arguments</th><th>Asks for</th></tr></thead>
+        <tbody>
+          <tr><td><code>summarize</code></td><td><code>text</code>, <code>style</code>?: <code>brief</code> · <code>detailed</code></td><td>A summary of a text</td></tr>
+          <tr><td><code>code_review</code></td><td><code>code</code>, <code>language</code>?</td><td>A review of a piece of code</td></tr>
+          <tr><td><code>weather_report</code></td><td><code>city</code></td><td>A short weather report, with the city's weather <strong>embedded as a resource</strong>. <code>"Atlantis"</code> is never found</td></tr>
+        </tbody>
+      </table>
+<pre><code><span class="tok-key">await</span> client.<span class="tok-fn">getPrompt</span>({ name: <span class="tok-str">"weather_report"</span>, arguments: { city: <span class="tok-str">"Madrid"</span> } });
+<span class="tok-com">// { description: "A weather report for Madrid", messages: [</span>
+<span class="tok-com">//   { role: "user", content: { type: "text", text: "Write a short, friendly weather report for Madrid from this data:" } },</span>
+<span class="tok-com">//   { role: "user", content: { type: "resource", resource: { uri: "weather://Madrid", mimeType: "application/json", text: "…" } } } ] }</span></code></pre>
+      <p>On 2026-07-28, <code>prompts/get</code> requires the <code>Mcp-Name</code> header. Before 2025-06-18, display titles are left out.</p>
+    </section>
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>Built by <a class="footer-brand" href="https://axium-lab.com">Axium</a> — the Zero Trust AI gateway.</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="api.html">Docs</a>
+      <a href="https://github.com/axium-lab/mcp-mock">GitHub</a>
+      <a href="https://github.com/axium-lab/mcp-mock/pkgs/container/mcp-mock">Docker</a>
+      <a href="https://github.com/axium-lab/mcp-mock/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

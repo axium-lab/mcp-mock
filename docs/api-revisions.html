@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spec revisions — mcp-mock</title>
+<meta name="description" content="How mcp-mock serves each MCP spec revision, from 2024-11-05 to 2026-07-28: transports, handshakes, error codes, and the 2026-07-28 surface — the _meta envelope, multi round-trip requests, progress, cancellation, subscriptions and tasks." />
+<link rel="canonical" href="https://mcp-mock.com/api-revisions.html" />
+<meta name="theme-color" content="#0b0e14" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%235b7cfa'/><text x='16' y='23' font-family='monospace' font-size='16' font-weight='700' fill='%23ffffff' text-anchor='middle'>{}</text></svg>" />
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="mcp-mock" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:title" content="mcp-mock — Spec revisions" />
+<meta property="og:description" content="Every MCP spec revision from 2024-11-05 to 2026-07-28, and the 2026-07-28 surface: the _meta envelope, multi round-trip requests, progress, cancellation, subscriptions and tasks." />
+<meta property="og:url" content="https://mcp-mock.com/api-revisions.html" />
+<meta property="og:image" content="https://mcp-mock.com/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="mcp-mock — test your MCP client against every spec revision. A mock Model Context Protocol server: 2024-11-05 to 2026-07-28, deterministic tools, OAuth, tasks and streaming." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="mcp-mock — Spec revisions" />
+<meta name="twitter:description" content="Every MCP spec revision from 2024-11-05 to 2026-07-28, and the 2026-07-28 surface: the _meta envelope, multi round-trip requests, progress, cancellation, subscriptions and tasks." />
+<meta name="twitter:image" content="https://mcp-mock.com/og-image.png" />
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "mcp-mock — Spec revisions",
+  "description": "Every MCP spec revision from 2024-11-05 to 2026-07-28, and the 2026-07-28 surface: the _meta envelope, multi round-trip requests, progress, cancellation, subscriptions and tasks.",
+  "url": "https://mcp-mock.com/api-revisions.html",
+  "author": { "@type": "Organization", "name": "Axium", "url": "https://axium-lab.com" },
+  "about": { "@type": "SoftwareApplication", "name": "mcp-mock", "url": "https://mcp-mock.com/" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mcp-mock.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://mcp-mock.com/api.html" },
+    { "@type": "ListItem", "position": 3, "name": "Spec revisions", "item": "https://mcp-mock.com/api-revisions.html" }
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><a href="index.html">mcp<span>-</span>mock</a></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a class="active" href="api.html">Docs</a>
+      <a class="gh" href="https://github.com/axium-lab/mcp-mock">GitHub ↗</a>
+    </div>
+  </nav>
+</div>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow"><a href="api.html">Docs</a> / Revisions</span>
+    <h1>Spec revisions</h1>
+    <p class="sub">
+      Five revisions of the Model Context Protocol, each served as its spec defines it. What differs between
+      revisions differs on the wire too — so a client that handles only one of them shows it here, not in production.
+    </p>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="layout">
+  <aside class="toc">
+    <p class="toc-title">On this page</p>
+    <p class="toc-group">Revisions</p>
+    <ul>
+      <li><a href="#compare">At a glance</a></li>
+      <li><a href="#legacy">Legacy revisions</a></li>
+      <li><a href="#modern">2026-07-28</a></li>
+    </ul>
+    <p class="toc-group">2026-07-28 surface</p>
+    <ul>
+      <li><a href="#mrtr">Multi round-trip</a></li>
+      <li><a href="#progress">Progress &amp; cancellation</a></li>
+      <li><a href="#subscriptions">Subscriptions</a></li>
+      <li><a href="#tasks">Tasks</a></li>
+    </ul>
+    <p class="toc-group">Docs</p>
+    <ul>
+      <li><a href="api.html">Overview</a></li>
+      <li><a href="api-catalog.html">Tools, resources &amp; prompts</a></li>
+      <li><a href="api-oauth.html">OAuth</a></li>
+    </ul>
+  </aside>
+
+  <main>
+    <section id="compare">
+      <h2>At a glance</h2>
+      <p class="section-sub">A few of the differences the mock reproduces. Every message it sends is validated in its test suite against the official <code>schema.json</code> of its revision.</p>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th></th><th>2024-11-05</th><th>2025-03-26</th><th>2025-06-18</th><th>2025-11-25</th><th>2026-07-28</th></tr></thead>
+        <tbody>
+          <tr><td>Transport</td><td>HTTP+SSE</td><td>Streamable HTTP</td><td>Streamable HTTP</td><td>Streamable HTTP</td><td>Streamable HTTP, stateless</td></tr>
+          <tr><td>Handshake</td><td><code>initialize</code></td><td><code>initialize</code></td><td><code>initialize</code></td><td><code>initialize</code></td><td>none: <code>_meta</code> on every request, <code>server/discover</code></td></tr>
+          <tr><td>JSON-RPC batches</td><td>no</td><td>yes</td><td>no</td><td>no</td><td>no</td></tr>
+          <tr><td>Structured content, resource links, titles</td><td>no</td><td>no</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Tool annotations</td><td>no</td><td>yes</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Invalid tool arguments</td><td>protocol error</td><td>protocol error</td><td>protocol error</td><td><code>isError</code> result</td><td><code>isError</code> result</td></tr>
+          <tr><td>Resource not found</td><td><code>-32002</code></td><td><code>-32002</code></td><td><code>-32002</code></td><td><code>-32002</code></td><td><code>-32602</code></td></tr>
+          <tr><td>Progress <code>message</code></td><td>no</td><td>yes</td><td>yes</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Elicitation (<code>delete_file</code>)</td><td>no</td><td>no</td><td>no</td><td>no</td><td>yes, multi round-trip</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>The legacy revisions are served <strong>without sessions</strong>, which the spec allows, so they keep no state between requests. The one piece of state in the whole mock is the open stream of a 2024-11-05 SSE connection, forgotten when it closes.</p>
+    </section>
+
+    <section id="legacy">
+      <h2>Legacy revisions</h2>
+      <p class="section-sub">The <code>initialize</code> era, from 2024-11-05 to 2025-11-25.</p>
+
+      <h3>2025-11-25 — <code>/2025-11-25/mcp</code></h3>
+      <p><code>initialize</code> always answers with its own version, as the spec's negotiation prescribes for a version it does not support. Notifications and posted responses get <code>202</code>; a <code>MCP-Protocol-Version</code> header naming another version gets <code>400</code>. GET and DELETE answer <code>405</code>, since there is no server stream and no session to end. Arguments that break a tool's input schema are a tool execution error (<code>isError: true</code>).</p>
+
+      <h3>2025-06-18 — <code>/2025-06-18/mcp</code></h3>
+      <p>The same server with two differences of its own: invalid tool arguments are a JSON-RPC <code>-32602</code> protocol error, as this revision lists them, and an error whose request id cannot be read carries <code>id: null</code>, as JSON-RPC 2.0 and the official SDK server send it.</p>
+
+      <h3>2025-03-26 — <code>/2025-03-26/mcp</code></h3>
+      <p>Accepts <strong>JSON-RPC batches</strong>, as the revision requires: requests are answered with an array of responses in order, a malformed element gets its own error without failing the rest, notifications and responses alone get <code>202</code>, and <code>initialize</code> is refused inside a batch. The catalog comes in this revision's vocabulary: no <code>outputSchema</code>, <code>structuredContent</code> or <code>resource_link</code>, and <code>title</code> moves into <code>annotations.title</code>.</p>
+<pre><code>[
+  { <span class="tok-str">"jsonrpc"</span>: <span class="tok-str">"2.0"</span>, <span class="tok-str">"id"</span>: <span class="tok-str">1</span>, <span class="tok-str">"method"</span>: <span class="tok-str">"tools/call"</span>, <span class="tok-str">"params"</span>: { <span class="tok-str">"name"</span>: <span class="tok-str">"add"</span>, <span class="tok-str">"arguments"</span>: { <span class="tok-str">"a"</span>: <span class="tok-str">1</span>, <span class="tok-str">"b"</span>: <span class="tok-str">2</span> } } },
+  { <span class="tok-str">"jsonrpc"</span>: <span class="tok-str">"2.0"</span>, <span class="tok-str">"id"</span>: <span class="tok-str">2</span>, <span class="tok-str">"method"</span>: <span class="tok-str">"prompts/list"</span> }
+]
+<span class="tok-com">// → [ { "id": 1, "result": … }, { "id": 2, "result": … } ]</span></code></pre>
+
+      <h3>2024-11-05 — <code>/2024-11-05/sse</code></h3>
+      <p>The deprecated HTTP+SSE transport. The first event names the message endpoint, POSTs are answered <code>202 Accepted</code>, and every response travels on the stream as a <code>message</code> event. Tools come without annotations or titles, which this revision did not have. Plain-text answers and error bodies follow the official SDK's SSE server.</p>
+      <p>The same transport is also served at the root, <code>/sse</code> and <code>/messages</code>, next to <code>/mcp</code>, as the spec suggests for servers that keep serving 2024-11-05 clients. Over it, <code>initialize</code> negotiates <em>any</em> legacy revision, and the session remembers the one negotiated.</p>
+    </section>
+
+    <section id="modern">
+      <h2>2026-07-28</h2>
+      <p class="section-sub">The stateless revision, at <code>/2026-07-28/mcp</code> and at <code>/mcp</code>. No handshake and no session: each request carries its protocol version and client capabilities in <code>_meta</code>.</p>
+      <table>
+        <thead><tr><th><code>_meta</code> key</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><code>io.modelcontextprotocol/protocolVersion</code></td><td>Required. <code>"2026-07-28"</code></td></tr>
+          <tr><td><code>io.modelcontextprotocol/clientCapabilities</code></td><td>Required. An object, e.g. <code>{ "elicitation": { "form": {} } }</code></td></tr>
+          <tr><td><code>io.modelcontextprotocol/clientInfo</code></td><td>Optional. <code>{ name, version }</code></td></tr>
+          <tr><td><code>io.modelcontextprotocol/logLevel</code></td><td>Optional. A logging level</td></tr>
+        </tbody>
+      </table>
+      <p>Every result carries <code>resultType</code> and the server identity in <code>_meta["io.modelcontextprotocol/serverInfo"]</code>. <code>server/discover</code> advertises the capabilities, and list results carry cache hints (<code>ttlMs</code>, <code>cacheScope</code>):</p>
+<pre><code>{
+  <span class="tok-str">"supportedVersions"</span>: [<span class="tok-str">"2026-07-28"</span>],
+  <span class="tok-str">"capabilities"</span>: {
+    <span class="tok-str">"tools"</span>: { <span class="tok-str">"listChanged"</span>: <span class="tok-key">true</span> },
+    <span class="tok-str">"resources"</span>: { <span class="tok-str">"listChanged"</span>: <span class="tok-key">true</span>, <span class="tok-str">"subscribe"</span>: <span class="tok-key">true</span> },
+    <span class="tok-str">"prompts"</span>: { <span class="tok-str">"listChanged"</span>: <span class="tok-key">true</span> },
+    <span class="tok-str">"extensions"</span>: { <span class="tok-str">"io.modelcontextprotocol/tasks"</span>: {} }
+  },
+  <span class="tok-str">"ttlMs"</span>: <span class="tok-str">3600000</span>, <span class="tok-str">"cacheScope"</span>: <span class="tok-str">"public"</span>, <span class="tok-str">"resultType"</span>: <span class="tok-str">"complete"</span>,
+  <span class="tok-str">"_meta"</span>: { <span class="tok-str">"io.modelcontextprotocol/serverInfo"</span>: { <span class="tok-str">"name"</span>: <span class="tok-str">"mcp-mock"</span>, <span class="tok-str">"version"</span>: <span class="tok-str">"0.1.0"</span> } }
+}</code></pre>
+
+      <h3 id="validation">Request validation</h3>
+      <p>The standard headers mirror the body so intermediaries can route without parsing it: <code>MCP-Protocol-Version</code>, <code>Mcp-Method</code>, and <code>Mcp-Name</code> for <code>tools/call</code>, <code>prompts/get</code>, <code>resources/read</code> and the <code>tasks/*</code> methods. Values that are not plain ASCII travel as <code>=?base64?…?=</code>. Requests are checked in the same order as the official SDK server, and each failure gets the HTTP status and code the spec assigns:</p>
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Failure</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>JSON-RPC shape (batches and posted responses refused)</td><td><code>400</code> · <code>-32600</code></td></tr>
+          <tr><td>2</td><td>Era: legacy traffic, like an <code>initialize</code></td><td><code>400</code> · <code>-32022</code> listing the versions served</td></tr>
+          <tr><td>3</td><td>The <code>_meta</code> envelope</td><td><code>400</code> · <code>-32602</code></td></tr>
+          <tr><td>4</td><td>Header/body agreement (version, <code>Mcp-Method</code>)</td><td><code>400</code> · <code>-32020</code></td></tr>
+          <tr><td>5</td><td>Supported version</td><td><code>400</code> · <code>-32022</code></td></tr>
+          <tr><td>6</td><td>Standard headers present, <code>Mcp-Name</code> matching</td><td><code>400</code> · <code>-32020</code></td></tr>
+          <tr><td>7</td><td>Method exists</td><td><code>404</code> · <code>-32601</code></td></tr>
+        </tbody>
+      </table>
+      <p>Past these checks, errors from the method itself travel in-band with HTTP <code>200</code>, except those the spec ties to a status — <code>-32021</code>, a missing client capability, is <code>400</code>. GET and DELETE answer <code>405</code>, and a session id is ignored and never minted.</p>
+    </section>
+
+    <section id="mrtr">
+      <h2>Multi round-trip requests</h2>
+      <p class="section-sub">On 2026-07-28 a server that needs input from the user does not call the client back: it answers <code>input_required</code>, and the client retries with the answers. The mock keeps it stateless.</p>
+      <p><code>delete_file</code> asks for confirmation with a form elicitation. The official SDK fulfils <code>input_required</code> with your elicitation handler and retries the call by itself:</p>
+<pre><code><span class="tok-key">const</span> client = <span class="tok-key">new</span> <span class="tok-fn">Client</span>(info, {
+  versionNegotiation: { mode: { pin: <span class="tok-str">"2026-07-28"</span> } },
+  capabilities: { elicitation: { form: {} } },
+});
+client.<span class="tok-fn">setRequestHandler</span>(<span class="tok-str">"elicitation/create"</span>, () =&gt; ({ action: <span class="tok-str">"accept"</span>, content: { confirm: <span class="tok-key">true</span> } }));
+
+<span class="tok-key">await</span> client.<span class="tok-fn">callTool</span>({ name: <span class="tok-str">"delete_file"</span>, arguments: { path: <span class="tok-str">"/tmp/old.log"</span> } });
+<span class="tok-com">// asked: "Delete /tmp/old.log? This cannot be undone."</span>
+<span class="tok-com">// → structuredContent: { path: "/tmp/old.log", deleted: true }</span></code></pre>
+      <ul>
+        <li>Declining, cancelling, or accepting without <code>confirm: true</code> returns <code>isError: true</code> — <em>Deletion cancelled: /tmp/old.log was not deleted</em>.</li>
+        <li>The <code>requestState</code> binds the confirmation to the file, so it cannot be replayed on another path.</li>
+        <li>A client that does not declare form elicitation gets <code>-32021</code> (<code>MissingRequiredClientCapabilityError</code>, HTTP <code>400</code>).</li>
+      </ul>
+      <p>To test any other round trip, force one with <code>_meta["com.mcp-mock/input-required"]</code> on any <code>tools/call</code>. Its retry returns what your client answered, unless the request also forces a result with <code>com.mcp-mock/response</code>. See <a href="api.html#control-input">Forcing <code>input_required</code></a>.</p>
+    </section>
+
+    <section id="progress">
+      <h2>Progress &amp; cancellation</h2>
+      <p class="section-sub"><code>simulate_work</code> really waits between steps, so progress, timeouts and cancellation all have something to act on.</p>
+      <p>A request with <code>_meta.progressToken</code> gets <code>notifications/progress</code> for each step, then its result:</p>
+<pre><code><span class="tok-key">await</span> client.<span class="tok-fn">callTool</span>(
+  { name: <span class="tok-str">"simulate_work"</span>, arguments: { steps: <span class="tok-str">2</span>, step_ms: <span class="tok-str">10</span> } },
+  { onprogress: (p) =&gt; console.<span class="tok-fn">log</span>(p) },
+);
+<span class="tok-com">// { progress: 1, total: 2, message: "Step 1 of 2" }</span>
+<span class="tok-com">// { progress: 2, total: 2, message: "Step 2 of 2" }</span>
+<span class="tok-com">// → structuredContent: { steps: 2, completed: true }</span></code></pre>
+      <p>On Streamable HTTP the response turns into an SSE stream only once there is progress to send, so a request that reports none — or an error tied to an HTTP status such as <code>-32021</code> — still gets a plain JSON response. On the 2024-11-05 transport the notifications travel on the session stream, without <code>message</code>, which that revision did not have.</p>
+      <table>
+        <thead><tr><th>Transport</th><th>Cancellation</th></tr></thead>
+        <tbody>
+          <tr><td>2026-07-28</td><td>Closing the response stream cancels the request: the server stops and sends nothing more.</td></tr>
+          <tr><td>2024-11-05 SSE</td><td><code>notifications/cancelled</code> cancels a running request of the same session, which is never answered.</td></tr>
+          <tr><td>Legacy Streamable HTTP</td><td>Without sessions to pair it with a request, <code>notifications/cancelled</code> is accepted and ignored, as the spec allows. A dropped connection is not taken as a cancellation, as those revisions require.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="subscriptions">
+      <h2>Subscriptions</h2>
+      <p class="section-sub">The catalog never changes on its own, so a test scripts the changes its client should see with <code>_meta["com.mcp-mock/notifications"]</code>.</p>
+      <p>On 2026-07-28, <code>subscriptions/listen</code> opens a long-lived SSE stream. It is acknowledged first with the <strong>honored filter</strong> — resource subscriptions only for resources that exist — and every message carries the subscription id. Without a script it stays open and quiet, with keep-alive comments; with one it delivers the scripted notifications and, if asked, ends gracefully with the listen response.</p>
+<pre><code><span class="tok-key">const</span> subscription = <span class="tok-key">await</span> client.<span class="tok-fn">listen</span>({
+  toolsListChanged: <span class="tok-key">true</span>,
+  resourceSubscriptions: [<span class="tok-str">"file:///docs/README.md"</span>, <span class="tok-str">"file:///missing"</span>],
+});
+subscription.honoredFilter;
+<span class="tok-com">// { toolsListChanged: true, resourceSubscriptions: ["file:///docs/README.md"] }</span></code></pre>
+      <p>On the wire, the script travels in the listen request's <code>_meta</code>:</p>
+<pre><code>{
+  <span class="tok-str">"method"</span>: <span class="tok-str">"subscriptions/listen"</span>,
+  <span class="tok-str">"params"</span>: {
+    <span class="tok-str">"notifications"</span>: { <span class="tok-str">"toolsListChanged"</span>: <span class="tok-key">true</span>, <span class="tok-str">"resourceSubscriptions"</span>: [<span class="tok-str">"file:///docs/README.md"</span>] },
+    <span class="tok-str">"_meta"</span>: {
+      <span class="tok-com">…the envelope…,</span>
+      <span class="tok-str">"com.mcp-mock/notifications"</span>: {
+        <span class="tok-str">"events"</span>: [<span class="tok-str">"toolsListChanged"</span>, { <span class="tok-str">"resourceUpdated"</span>: <span class="tok-str">"file:///docs/README.md"</span> }],
+        <span class="tok-str">"intervalMs"</span>: <span class="tok-str">5</span>,
+        <span class="tok-str">"close"</span>: <span class="tok-key">true</span>
+      }
+    }
+  }
+}</code></pre>
+      <div class="callout">
+        A script that announces something <strong>not subscribed</strong> is refused, since the server must not send what was not asked for.
+      </div>
+      <p>On the 2024-11-05 SSE transport, <code>resources/subscribe</code> and <code>resources/unsubscribe</code> work, and the same script on <code>resources/subscribe</code> delivers <code>notifications/resources/updated</code> on the session stream. The legacy Streamable HTTP revisions, without sessions or a GET stream, have nowhere to deliver them and do not offer them.</p>
+    </section>
+
+    <section id="tasks">
+      <h2>Tasks</h2>
+      <p class="section-sub">The <code>io.modelcontextprotocol/tasks</code> extension on 2026-07-28, kept stateless: the task id carries the original call, its start and its duration, so any <code>tasks/get</code> can work out the task's state without anything stored.</p>
+      <p>For clients that declare the extension, <code>simulate_work</code> answers with a task (<code>resultType: "task"</code>) instead of blocking, and <code>_meta["com.mcp-mock/task"]</code> makes a task of any <code>tools/call</code>:</p>
+<pre><code><span class="tok-com">// tools/call get_weather { city: "Madrid" }, _meta: { "com.mcp-mock/task": { "durationMs": 2000 } }</span>
+<span class="tok-com">// → { resultType: "task", taskId: "task_eyJwYXJhbXMi…", status: "working", statusMessage: "Working: 0%",</span>
+<span class="tok-com">//     createdAt: "…", lastUpdatedAt: "…", ttlMs: 3600000, pollIntervalMs: 100 }</span>
+
+<span class="tok-com">// tasks/get { taskId } — two seconds later</span>
+<span class="tok-com">// → { status: "completed", result: { structuredContent: { city: "Madrid", … } }, … }</span></code></pre>
+      <table>
+        <thead><tr><th>Method</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td><code>tasks/get</code></td><td><code>working</code>, then <code>completed</code> with the result the call would have returned, or <code>failed</code> with its JSON-RPC error. A tool execution error <em>completes</em> the task, as the extension requires.</td></tr>
+          <tr><td><code>tasks/update</code>, <code>tasks/cancel</code></td><td>Acknowledge. Cancellation is cooperative, and a stateless task still finishes, which the extension allows.</td></tr>
+          <tr><td><code>subscriptions/listen</code></td><td>Accepts <code>taskIds</code> and sends <code>notifications/tasks</code> when each task finishes.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        Unknown tasks are <code>-32602</code>, clients without the extension get <code>-32021</code>, and <code>Mcp-Name</code> must carry
+        the task id. Task timestamps are real — the one exception to the mock's determinism; task results are not affected.
+        Every task message is validated against the extension's official schema.
+      </div>
+    </section>
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>Built by <a class="footer-brand" href="https://axium-lab.com">Axium</a> — the Zero Trust AI gateway.</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="api.html">Docs</a>
+      <a href="https://github.com/axium-lab/mcp-mock">GitHub</a>
+      <a href="https://github.com/axium-lab/mcp-mock/pkgs/container/mcp-mock">Docker</a>
+      <a href="https://github.com/axium-lab/mcp-mock/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

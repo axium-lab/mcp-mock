@@ -11,10 +11,10 @@ From the team behind [llm-mock](https://github.com/axium-lab/llm-mock).
 ## Quick start
 
 ```bash
-docker run --rm -p 3000:3000 ghcr.io/axium-lab/mcp-mock
+docker run --rm -p 3000:3000 ghcr.io/axium-lab/mcp-mock:0.1.0
 ```
 
-Or from a clone of this repository:
+See [Docker](#docker) for the available tags. Or from a clone of this repository:
 
 ```bash
 bun install
@@ -127,6 +127,26 @@ Authorization is opt-in by URL: everything under `/protected/` requires a bearer
 - To provoke failures: the `mcp-mock:deny` scope makes the user deny access, and `mcp_mock_expires_in` on the token endpoint issues tokens that expire when you want.
 
 The official SDK's OAuth flow runs end to end against it. Codes and tokens are signed with a fixed, public key and are not single-use: this is a test double, not an authorization server for real users.
+
+## Docker
+
+Every [release](https://github.com/axium-lab/mcp-mock/releases) publishes an image to the GitHub Container Registry, for `linux/amd64` and `linux/arm64`. No login is needed to pull it:
+
+```bash
+docker pull ghcr.io/axium-lab/mcp-mock:0.1.0
+```
+
+| Tag | Points to |
+| --- | --- |
+| `0.1.0` | That exact release. Pin this one in CI so your tests don't change under you. |
+| `0.1` | The latest patch release of 0.1. |
+| `latest` | The latest release. |
+
+The container listens on port 3000 and reports its state to Docker through `/health`. To serve on another port, change both sides:
+
+```bash
+docker run --rm -p 8080:8080 -e MCP_MOCK_PORT=8080 ghcr.io/axium-lab/mcp-mock:0.1.0
+```
 
 ## Configuration
 

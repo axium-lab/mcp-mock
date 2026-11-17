@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OAuth — mcp-mock</title>
+<meta name="description" content="OAuth in mcp-mock: every endpoint served again under /protected/ behind a bearer token, with its own stateless authorization server — Protected Resource Metadata, PKCE, refresh tokens, Dynamic Client Registration and switches to provoke failures." />
+<link rel="canonical" href="https://mcp-mock.com/api-oauth.html" />
+<meta name="theme-color" content="#0b0e14" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%235b7cfa'/><text x='16' y='23' font-family='monospace' font-size='16' font-weight='700' fill='%23ffffff' text-anchor='middle'>{}</text></svg>" />
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="mcp-mock" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:title" content="mcp-mock — OAuth" />
+<meta property="og:description" content="Every endpoint again under /protected/ behind a bearer token, with a stateless authorization server: discovery metadata, PKCE, refresh tokens, Dynamic Client Registration and failure switches." />
+<meta property="og:url" content="https://mcp-mock.com/api-oauth.html" />
+<meta property="og:image" content="https://mcp-mock.com/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="mcp-mock — test your MCP client against every spec revision. A mock Model Context Protocol server: 2024-11-05 to 2026-07-28, deterministic tools, OAuth, tasks and streaming." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="mcp-mock — OAuth" />
+<meta name="twitter:description" content="Every endpoint again under /protected/ behind a bearer token, with a stateless authorization server: discovery metadata, PKCE, refresh tokens, Dynamic Client Registration and failure switches." />
+<meta name="twitter:image" content="https://mcp-mock.com/og-image.png" />
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "mcp-mock — OAuth",
+  "description": "Every endpoint again under /protected/ behind a bearer token, with a stateless authorization server: discovery metadata, PKCE, refresh tokens, Dynamic Client Registration and failure switches.",
+  "url": "https://mcp-mock.com/api-oauth.html",
+  "author": { "@type": "Organization", "name": "Axium", "url": "https://axium-lab.com" },
+  "about": { "@type": "SoftwareApplication", "name": "mcp-mock", "url": "https://mcp-mock.com/" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mcp-mock.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://mcp-mock.com/api.html" },
+    { "@type": "ListItem", "position": 3, "name": "OAuth", "item": "https://mcp-mock.com/api-oauth.html" }
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><a href="index.html">mcp<span>-</span>mock</a></div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a class="active" href="api.html">Docs</a>
+      <a class="gh" href="https://github.com/axium-lab/mcp-mock">GitHub ↗</a>
+    </div>
+  </nav>
+</div>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow"><a href="api.html">Docs</a> / OAuth</span>
+    <h1>OAuth</h1>
+    <p class="sub">
+      Authorization is opt-in by URL: everything under <code>/protected/</code> requires a bearer token, and
+      everything else stays open. The mock is both the MCP server and its own authorization server, on the same
+      origin and without state — so the official SDK's OAuth flow runs end to end against it.
+    </p>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="layout">
+  <aside class="toc">
+    <p class="toc-title">On this page</p>
+    <p class="toc-group">OAuth</p>
+    <ul>
+      <li><a href="#protected">Protected endpoints</a></li>
+      <li><a href="#discovery">Discovery</a></li>
+      <li><a href="#flow">The flow</a></li>
+      <li><a href="#sdk">With the SDK</a></li>
+      <li><a href="#failures">Provoking failures</a></li>
+      <li><a href="#caveats">Caveats</a></li>
+    </ul>
+    <p class="toc-group">Docs</p>
+    <ul>
+      <li><a href="api.html">Overview</a></li>
+      <li><a href="api-catalog.html">Tools, resources &amp; prompts</a></li>
+      <li><a href="api-revisions.html">Spec revisions</a></li>
+    </ul>
+  </aside>
+
+  <main>
+    <section id="protected">
+      <h2>Protected endpoints</h2>
+      <p class="section-sub">Every endpoint is served again under <code>/protected/</code>, identical except for the token: <code>/protected/mcp</code>, <code>/protected/2026-07-28/mcp</code>, <code>/protected/2024-11-05/sse</code>…</p>
+      <table>
+        <thead><tr><th>Request</th><th>Answer</th></tr></thead>
+        <tbody>
+          <tr><td>No token</td><td><code>401</code> with <code>WWW-Authenticate</code> naming the metadata and the <code>mcp</code> scope</td></tr>
+          <tr><td>Invalid, expired, or issued for another endpoint</td><td><code>401</code> · <code>invalid_token</code></td></tr>
+          <tr><td>Valid, without the <code>mcp</code> scope</td><td><code>403</code> · <code>insufficient_scope</code></td></tr>
+          <tr><td>Valid</td><td>Served as the open endpoint would</td></tr>
+        </tbody>
+      </table>
+<pre><code>curl -i http://localhost:3000/protected/mcp -X POST …
+
+<span class="tok-com"># HTTP/1.1 401 Unauthorized</span>
+<span class="tok-com"># WWW-Authenticate: Bearer scope="mcp",</span>
+<span class="tok-com">#   resource_metadata="http://localhost:3000/.well-known/oauth-protected-resource/protected/mcp"</span>
+<span class="tok-com">#</span>
+<span class="tok-com"># {"error":"unauthorized","error_description":"Authorization required"}</span></code></pre>
+      <div class="callout">
+        Tokens are only read from the <code>Authorization</code> header, and must have been issued for <strong>that very endpoint</strong>
+        (RFC 8707): a token for <code>/protected/mcp</code> is refused on <code>/protected/2025-11-25/mcp</code>. The token is checked
+        before <code>x-mcp-mock-status</code>, so a forced failure never hides a missing credential.
+      </div>
+    </section>
+
+    <section id="discovery">
+      <h2>Discovery</h2>
+      <p class="section-sub">URLs are built from the request's origin, so they are right behind a proxy or on a random test port.</p>
+      <table>
+        <thead><tr><th>URL</th><th>Serves</th></tr></thead>
+        <tbody>
+          <tr><td><code>/.well-known/oauth-protected-resource/protected/…</code></td><td>Protected Resource Metadata (RFC 9728), one document per protected endpoint</td></tr>
+          <tr><td><code>/.well-known/oauth-authorization-server</code></td><td>Authorization server metadata (RFC 8414)</td></tr>
+          <tr><td><code>/.well-known/openid-configuration</code></td><td>The same metadata, as OpenID Connect discovery</td></tr>
+          <tr><td><code>/oauth/authorize</code></td><td>Authorization endpoint</td></tr>
+          <tr><td><code>/oauth/token</code></td><td>Token endpoint</td></tr>
+          <tr><td><code>/oauth/register</code></td><td>Dynamic Client Registration (RFC 7591)</td></tr>
+        </tbody>
+      </table>
+<pre><code><span class="tok-com"># GET /.well-known/oauth-protected-resource/protected/mcp</span>
+{ <span class="tok-str">"resource"</span>: <span class="tok-str">"http://localhost:3000/protected/mcp"</span>, <span class="tok-str">"authorization_servers"</span>: [<span class="tok-str">"http://localhost:3000"</span>],
+  <span class="tok-str">"scopes_supported"</span>: [<span class="tok-str">"mcp"</span>], <span class="tok-str">"bearer_methods_supported"</span>: [<span class="tok-str">"header"</span>] }
+
+<span class="tok-com"># GET /.well-known/oauth-authorization-server</span>
+{ <span class="tok-str">"issuer"</span>: <span class="tok-str">"http://localhost:3000"</span>,
+  <span class="tok-str">"authorization_endpoint"</span>: <span class="tok-str">"http://localhost:3000/oauth/authorize"</span>,
+  <span class="tok-str">"token_endpoint"</span>: <span class="tok-str">"http://localhost:3000/oauth/token"</span>,
+  <span class="tok-str">"registration_endpoint"</span>: <span class="tok-str">"http://localhost:3000/oauth/register"</span>,
+  <span class="tok-str">"response_types_supported"</span>: [<span class="tok-str">"code"</span>], <span class="tok-str">"grant_types_supported"</span>: [<span class="tok-str">"authorization_code"</span>, <span class="tok-str">"refresh_token"</span>],
+  <span class="tok-str">"code_challenge_methods_supported"</span>: [<span class="tok-str">"S256"</span>], <span class="tok-str">"token_endpoint_auth_methods_supported"</span>: [<span class="tok-str">"none"</span>],
+  <span class="tok-str">"scopes_supported"</span>: [<span class="tok-str">"mcp"</span>], <span class="tok-str">"client_id_metadata_document_supported"</span>: <span class="tok-key">true</span>,
+  <span class="tok-str">"authorization_response_iss_parameter_supported"</span>: <span class="tok-key">true</span> }</code></pre>
+    </section>
+
+    <section id="flow">
+      <h2>The flow</h2>
+      <p class="section-sub">Authorization code with PKCE, as the MCP spec requires. There is no login page: the user always approves at once.</p>
+      <h3>1. Register (optional)</h3>
+      <p><code>POST /oauth/register</code> with JSON client metadata; <code>redirect_uris</code> must list absolute URLs. It answers <code>201</code> with the metadata plus a <code>client_id</code> derived from it — the same client always registers to the same id — and <code>token_endpoint_auth_method: "none"</code>. Any non-empty <code>client_id</code> is accepted, so registration can also be skipped.</p>
+      <h3>2. Authorize</h3>
+      <p><code>GET /oauth/authorize</code> with <code>response_type=code</code>, <code>client_id</code>, an absolute <code>redirect_uri</code>, <code>code_challenge</code> with <code>code_challenge_method=S256</code>, <code>resource</code> (the endpoint's canonical URI), and optionally <code>scope</code> (default <code>mcp</code>) and <code>state</code>. It redirects straight back with <code>code</code>, <code>state</code> and <code>iss</code> (RFC 9207). Codes live 60 seconds.</p>
+<pre><code><span class="tok-com"># 302 Found</span>
+Location: http://localhost:8080/callback?code=mcpmock_code.…&amp;state=xyz&amp;iss=http%3A%2F%2Flocalhost%3A3000</code></pre>
+      <h3>3. Exchange the code</h3>
+<pre><code>curl http://localhost:3000/oauth/token \
+  -d grant_type=authorization_code -d code=mcpmock_code.… -d client_id=my-client \
+  -d redirect_uri=http://localhost:8080/callback -d code_verifier=…
+
+<span class="tok-com"># { "access_token": "…", "token_type": "Bearer", "expires_in": 3600,</span>
+<span class="tok-com">#   "refresh_token": "…", "scope": "mcp" }</span></code></pre>
+      <p>The <code>client_id</code>, <code>redirect_uri</code> and <code>code_verifier</code> must match the authorization request, and <code>resource</code>, if sent, too. Access tokens last an hour. <code>grant_type=refresh_token</code> issues a new access token for the same client, scope and resource, and keeps the refresh token.</p>
+    </section>
+
+    <section id="sdk">
+      <h2>With the SDK</h2>
+      <p class="section-sub">Give the transport an <code>authProvider</code>. Because the mock redirects at once, your <code>redirectToAuthorization</code> can just fetch the URL and read the code off the <code>Location</code> header.</p>
+<pre><code><span class="tok-key">const</span> url = <span class="tok-key">new</span> <span class="tok-fn">URL</span>(<span class="tok-str">"http://localhost:3000/protected/mcp"</span>);
+<span class="tok-key">let</span> code = <span class="tok-str">""</span>, iss = <span class="tok-str">""</span>;
+<span class="tok-key">const</span> authProvider = {
+  <span class="tok-com">// redirectUrl, clientMetadata, clientInformation, saveClientInformation,</span>
+  <span class="tok-com">// tokens, saveTokens, saveCodeVerifier, codeVerifier …</span>
+  <span class="tok-key">async</span> <span class="tok-fn">redirectToAuthorization</span>(authUrl) {
+    <span class="tok-key">const</span> res = <span class="tok-key">await</span> <span class="tok-fn">fetch</span>(authUrl, { redirect: <span class="tok-str">"manual"</span> });
+    <span class="tok-key">const</span> location = <span class="tok-key">new</span> <span class="tok-fn">URL</span>(res.headers.<span class="tok-fn">get</span>(<span class="tok-str">"location"</span>));
+    code = location.searchParams.<span class="tok-fn">get</span>(<span class="tok-str">"code"</span>);
+    iss = location.searchParams.<span class="tok-fn">get</span>(<span class="tok-str">"iss"</span>);
+  },
+};
+
+<span class="tok-com">// 1. The first connection discovers everything, registers and redirects → UnauthorizedError</span>
+<span class="tok-key">await</span> <span class="tok-key">new</span> <span class="tok-fn">Client</span>(info).<span class="tok-fn">connect</span>(<span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(url, { authProvider })).<span class="tok-fn">catch</span>(() =&gt; {});
+
+<span class="tok-com">// 2. Exchange the code for tokens</span>
+<span class="tok-key">await</span> <span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(url, { authProvider }).<span class="tok-fn">finishAuth</span>(code, iss);
+
+<span class="tok-com">// 3. Connect for real</span>
+<span class="tok-key">const</span> client = <span class="tok-key">new</span> <span class="tok-fn">Client</span>(info);
+<span class="tok-key">await</span> client.<span class="tok-fn">connect</span>(<span class="tok-key">new</span> <span class="tok-fn">StreamableHTTPClientTransport</span>(url, { authProvider }));</code></pre>
+      <p>The flow works on modern and legacy connections alike.</p>
+    </section>
+
+    <section id="failures">
+      <h2>Provoking failures</h2>
+      <p class="section-sub">Two mock-only switches reach the failure paths a real authorization server rarely offers on demand.</p>
+      <table>
+        <thead><tr><th>Switch</th><th>Where</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>mcp-mock:deny</code> scope</td><td><code>/oauth/authorize</code></td><td>The user denies access: the redirect carries <code>error=access_denied</code></td></tr>
+          <tr><td><code>mcp_mock_expires_in</code></td><td><code>/oauth/token</code></td><td>Issues an access token that expires after that many seconds, from 1 to 86400 — to test expiry and refresh</td></tr>
+        </tbody>
+      </table>
+      <p>The spec's own failures are there too: a missing PKCE challenge is <code>invalid_request</code>, a <code>resource</code> that is not an absolute URI is <code>invalid_target</code>, a wrong verifier, client or redirect URI is <code>invalid_grant</code>, an unknown grant type is <code>unsupported_grant_type</code>. Errors that cannot be trusted to a redirect URI — a missing <code>client_id</code> or a malformed <code>redirect_uri</code> — are answered directly instead of redirected.</p>
+    </section>
+
+    <section id="caveats">
+      <h2>Caveats</h2>
+      <div class="callout">
+        <strong>This is a test double, not an authorization server for real users.</strong> Codes and tokens are signed with a fixed,
+        public key and are self-contained, so nothing is stored — and an authorization code is not single-use.
+        Never put <code>/protected/</code> in front of anything that matters.
+      </div>
+    </section>
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>Built by <a class="footer-brand" href="https://axium-lab.com">Axium</a> — the Zero Trust AI gateway.</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="api.html">Docs</a>
+      <a href="https://github.com/axium-lab/mcp-mock">GitHub</a>
+      <a href="https://github.com/axium-lab/mcp-mock/pkgs/container/mcp-mock">Docker</a>
+      <a href="https://github.com/axium-lab/mcp-mock/blob/main/LICENSE">MIT License</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
