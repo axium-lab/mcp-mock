@@ -64,6 +64,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - `subscriptions/listen` accepts `taskIds` and sends `notifications/tasks` when each task finishes.
   - The extension's official schema is vendored under `schemas/extensions/tasks/` and every task message is validated against it. Task timestamps are real, the one exception to the mock's determinism; task results are not affected.
 
+- OAuth, opt-in by URL: every endpoint is served again under `/protected/...` behind a bearer token, while the open endpoints stay as they are. The mock is both the MCP server (an OAuth resource server) and its own authorization server, on the same origin and without state:
+  - Protected Resource Metadata (RFC 9728) for each protected endpoint. A request without a token gets `401` with `WWW-Authenticate` naming the metadata and the `mcp` scope; an invalid, expired or wrongly addressed token gets `401` `invalid_token`; a token without the scope gets `403` `insufficient_scope`. Tokens are only read from the `Authorization` header and must have been issued for that very endpoint (RFC 8707).
+  - Authorization server metadata (RFC 8414, also as OpenID Connect discovery), an authorization endpoint that approves at once and redirects back with `code` and `iss` (RFC 9207), a token endpoint for the authorization code grant with PKCE S256 and for refresh tokens, and Dynamic Client Registration with stable client ids. Codes and tokens are signed and self-contained, so an authorization code is not single-use.
+  - Failure paths for tests: the `mcp-mock:deny` scope makes the user deny access, and `mcp_mock_expires_in` on the token endpoint issues tokens that expire when the test wants them to.
+  - The official SDK runs the whole flow against it, on modern and legacy connections.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.
