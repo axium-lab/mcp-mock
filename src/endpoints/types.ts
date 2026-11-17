@@ -12,6 +12,9 @@ export interface Endpoint {
   // Where the router is mounted: "/2026-07-28" for a pinned revision, "" for
   // the dual-era endpoint at the root.
   mountPath: string;
+  // The URLs a client connects to, relative to mountPath: "/mcp" for
+  // Streamable HTTP, "/sse" for the 2024-11-05 transport.
+  entryPaths: readonly string[];
   // The revisions this endpoint answers with, newest first.
   revisions: readonly RevisionId[];
   createRouter(): Router;

@@ -21,5 +21,8 @@ export async function startServer(): Promise<RunningServer> {
 export function stopServer(server: Server): Promise<void> {
   return new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()));
+    // A 2024-11-05 SSE stream a test left open would otherwise keep close()
+    // waiting forever.
+    server.closeAllConnections();
   });
 }

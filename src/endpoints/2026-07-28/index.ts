@@ -53,6 +53,7 @@ async function handlePost(req: Request, res: Response): Promise<void> {
 export const endpoint20260728: Endpoint = {
   name: REVISION,
   mountPath: `/${REVISION}`,
+  entryPaths: ["/mcp"],
   revisions: MODERN_VERSIONS,
   createRouter() {
     const router = Router();

@@ -1,8 +1,22 @@
 import {
   Client,
+  SSEClientTransport,
   StreamableHTTPClientTransport,
   type VersionNegotiationMode,
 } from "@modelcontextprotocol/client";
+
+// A legacy client on the deprecated 2024-11-05 HTTP+SSE transport.
+export async function connectSseClient(url: string, supportedProtocolVersions?: string[]): Promise<Client> {
+  const client = new Client(
+    { name: "mcp-mock-tests", version: "0.0.0" },
+    {
+      versionNegotiation: { mode: "legacy" },
+      ...(supportedProtocolVersions ? { supportedProtocolVersions } : {}),
+    },
+  );
+  await client.connect(new SSEClientTransport(new URL(url)));
+  return client;
+}
 
 // Builds an official TypeScript SDK client (v2) aimed at one endpoint. The v2
 // client speaks every revision mcp-mock serves, so it is the CI client for all

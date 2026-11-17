@@ -7,7 +7,7 @@ import {
   parseJson,
   parseMessage,
 } from "../../core/jsonrpc.ts";
-import { reject, TRANSPORT_ERROR_CODE } from "../2026-07-28/errors.ts";
+import { type Rejection, reject, TRANSPORT_ERROR_CODE } from "../2026-07-28/errors.ts";
 import {
   bodyErrorHandlerWith,
   checkPostHeaders,
@@ -40,7 +40,7 @@ export function defaultProfile(profiles: readonly LegacyProfile[]): LegacyProfil
 // and gets it when served, the newest otherwise. Every later message carries
 // the negotiated version in MCP-Protocol-Version; a header naming a version
 // not served is refused.
-function profileFor(
+export function profileFor(
   message: { method?: string; params?: Record<string, unknown> } | undefined,
   headerVersion: string | undefined,
   profiles: readonly LegacyProfile[],
@@ -54,7 +54,7 @@ function profileFor(
 }
 
 const handlerCache = new Map<LegacyProfile, ReturnType<typeof legacyHandlers>>();
-function handlersFor(profile: LegacyProfile) {
+export function handlersFor(profile: LegacyProfile) {
   let handlers = handlerCache.get(profile);
   if (!handlers) {
     handlers = legacyHandlers(profile);
@@ -72,33 +72,29 @@ function unsupportedHeader(headerVersion: string, profiles: readonly LegacyProfi
   );
 }
 
+export type BatchOutcome =
+  | { kind: "accepted" }
+  | { kind: "answers"; answers: JsonRpcResponse[] }
+  | { kind: "refused"; rejection: Rejection };
+
 // A JSON-RPC batch, for the revision that has them (2025-03-26). Requests and
 // notifications may be batched together, responses only with responses.
 // Each element is answered on its own, as JSON-RPC prescribes: a malformed
 // element gets its error in the response array without failing the others.
-async function serveBatch(
-  batch: unknown[],
-  res: Response,
-  profile: LegacyProfile,
-): Promise<void> {
+// Transport-neutral, so the 2024-11-05 SSE transport can deliver the answers
+// on its stream.
+export async function answerBatch(batch: unknown[], profile: LegacyProfile): Promise<BatchOutcome> {
   const shape = shapeFor(profile);
-  if (batch.length === 0) {
-    return send(res, reject(400, undefined, ErrorCode.InvalidRequest, "Invalid Request: empty batch"), shape);
-  }
+  const refused = (message: string): BatchOutcome => {
+    const rejection = reject(400, undefined, ErrorCode.InvalidRequest, `Invalid Request: ${message}`);
+    return { kind: "refused", rejection: { ...rejection, body: shape(rejection.body) } };
+  };
+  if (batch.length === 0) return refused("empty batch");
 
   const parsed = batch.map(parseMessage);
   const responses = parsed.filter((element) => element.kind === "response").length;
-  if (responses === parsed.length) {
-    res.status(202).end();
-    return;
-  }
-  if (responses > 0) {
-    return send(
-      res,
-      reject(400, undefined, ErrorCode.InvalidRequest, "Invalid Request: a batch cannot mix responses with requests or notifications"),
-      shape,
-    );
-  }
+  if (responses === parsed.length) return { kind: "accepted" };
+  if (responses > 0) return refused("a batch cannot mix responses with requests or notifications");
 
   const answers: JsonRpcResponse[] = [];
   for (const element of parsed) {
@@ -115,12 +111,17 @@ async function serveBatch(
     }
     // Notifications are accepted and get no answer.
   }
+  return answers.length === 0 ? { kind: "accepted" } : { kind: "answers", answers };
+}
 
-  if (answers.length === 0) {
+async function serveBatch(batch: unknown[], res: Response, profile: LegacyProfile): Promise<void> {
+  const outcome = await answerBatch(batch, profile);
+  if (outcome.kind === "refused") return send(res, outcome.rejection);
+  if (outcome.kind === "accepted") {
     res.status(202).end();
     return;
   }
-  res.status(200).json(answers);
+  res.status(200).json(outcome.answers);
 }
 
 // Serves one already-decoded POST body. Exported for the dual-era /mcp
@@ -200,6 +201,7 @@ export function legacyRouter(profiles: readonly LegacyProfile[]): Router {
 export const endpoint20251125: Endpoint = {
   name: PROFILE_2025_11_25.revision,
   mountPath: `/${PROFILE_2025_11_25.revision}`,
+  entryPaths: ["/mcp"],
   revisions: [PROFILE_2025_11_25.revision as "2025-11-25"],
   createRouter: () => legacyRouter([PROFILE_2025_11_25]),
 };

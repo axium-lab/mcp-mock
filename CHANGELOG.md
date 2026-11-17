@@ -33,6 +33,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `/2025-03-26/mcp`, on the same legacy server. It accepts JSON-RPC batches, as the revision requires: requests are answered with an array of responses in order, a malformed element gets its own error without failing the rest, notifications and responses alone get `202`, and `initialize` is refused inside a batch. The catalog comes in the revision's vocabulary: no top-level `title` (it moves into `annotations.title`, which this revision has), no `outputSchema` or `structuredContent` (the JSON text block remains), and no `resource_link` blocks (`search_web`'s text keeps the URLs).
 - `/mcp` now serves 2025-03-26 too, and treats a legacy request without `MCP-Protocol-Version` as 2025-03-26, as the spec prescribes: the header only arrived in 2025-06-18.
 
+- 2024-11-05 over its deprecated HTTP+SSE transport, at `/2024-11-05/sse`: the first event names the message endpoint, POSTs are answered `202 Accepted`, and every response travels on the stream as a `message` event. Open streams are kept in memory by session id and forgotten when the connection closes, the one piece of state in the mock. Tools come without annotations or titles, which this revision did not have. Plain-text answers and error bodies follow the official SDK's SSE server.
+- The same transport at the root, `/sse` and `/messages`, next to `/mcp`, as the spec suggests for servers that keep serving 2024-11-05 clients. Over it, `initialize` negotiates any legacy revision, and the session remembers the one negotiated.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

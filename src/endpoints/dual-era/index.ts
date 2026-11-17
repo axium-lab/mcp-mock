@@ -1,5 +1,6 @@
 import express, { type Request, type Response, Router } from "express";
 import { parseJson } from "../../core/jsonrpc.ts";
+import { PROFILE_2024_11_05, sseRouter } from "../2024-11-05/index.ts";
 import { PROFILE_2025_03_26 } from "../2025-03-26/index.ts";
 import { PROFILE_2025_06_18 } from "../2025-06-18/index.ts";
 import { defaultProfile, serveLegacy } from "../2025-11-25/index.ts";
@@ -80,7 +81,8 @@ function methodNotAllowed(req: Request, res: Response): void {
 export const dualEraEndpoint: Endpoint = {
   name: "dual-era",
   mountPath: "",
-  revisions: [...MODERN_VERSIONS, "2025-11-25", "2025-06-18", "2025-03-26"],
+  entryPaths: ["/mcp", "/sse"],
+  revisions: [...MODERN_VERSIONS, "2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"],
   createRouter() {
     const router = Router();
     router.use("/mcp", express.text({ type: () => true, limit: "4mb" }));
@@ -90,6 +92,10 @@ export const dualEraEndpoint: Endpoint = {
     // Neither era has a GET stream or a session to end here.
     router.all("/mcp", methodNotAllowed);
     router.use("/mcp", bodyErrorHandler);
+    // The deprecated HTTP+SSE transport, hosted next to the MCP endpoint as
+    // the spec suggests for servers that keep serving 2024-11-05 clients.
+    // Over it, initialize may negotiate any legacy revision.
+    router.use(sseRouter([...LEGACY_PROFILES, PROFILE_2024_11_05]));
     return router;
   },
 };

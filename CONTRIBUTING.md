@@ -35,6 +35,7 @@ tests/         integration tests with the official SDK as the client
 - **Only routers know about HTTP.** Protocol logic (handlers, payload builders) never imports Express, so it can serve stdio later.
 - **Deterministic.** No `Math.random()`, no `Date.now()` in responses. The same request returns the same bytes.
 - **Stateless tools.** A tool's result depends only on its arguments.
+- **One exception to statelessness.** The 2024-11-05 HTTP+SSE transport (`src/endpoints/2024-11-05/`) cannot work without pairing each POST with its open stream, so it keeps open streams in memory by session id, and forgets them when the connection closes. Nothing else in the mock keeps state between requests.
 - **The hash is a contract.** Fake-world data comes from `src/tools/hash.ts`. Changing the hash, the generator or the order in which a tool draws values changes responses users may have snapshotted, so it is a breaking change. The snapshots in `tests/endpoints/__snapshots__/` catch it.
 - **Node-compatible source.** Relative imports carry their `.ts` extension, only erasable TypeScript syntax (no enums, namespaces or constructor parameter properties), and no `Bun.*` APIs in `src/`. Tests may use `bun:test`.
 

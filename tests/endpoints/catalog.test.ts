@@ -3,6 +3,7 @@ import type { RevisionId } from "../../src/core/revisions.ts";
 import { SAMPLES, TOOL_NAMES } from "../catalog.ts";
 import { validateAgainst, validateMessage } from "../schema.ts";
 import { type RunningServer, startServer, stopServer } from "../server.ts";
+import { openSse, type SseConnection } from "../sse.ts";
 
 // Every tool over the wire, in every revision: valid against that revision's
 // schema, byte-identical on repeat, and pinned by a snapshot so any change to
@@ -46,6 +47,38 @@ const WIRES: Wire[] = [
     params: (params) => params,
   },
 ];
+
+// 2024-11-05 has no Streamable HTTP: its answers arrive on the SSE stream.
+describe("catalog over 2024-11-05", () => {
+  const revision = "2024-11-05";
+  let running: RunningServer;
+  let sse: SseConnection;
+  beforeAll(async () => {
+    running = await startServer();
+    sse = await openSse(`${running.origin}/${revision}/sse`);
+  });
+  afterAll(async () => {
+    sse.close();
+    await stopServer(running.server);
+  });
+
+  it("lists the whole catalog", async () => {
+    const body = await sse.call({ jsonrpc: "2.0", id: 1, method: "tools/list" });
+    expect(validateMessage(revision, body)).toEqual({ valid: true, errors: [] });
+    expect(body.result.tools.map((tool: { name: string }) => tool.name)).toEqual(TOOL_NAMES);
+    expect(body.result.tools).toMatchSnapshot();
+  });
+
+  it.each(TOOL_NAMES)("calls %s", async (name) => {
+    const message = { jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: SAMPLES[name] } };
+    const body = await sse.call(message);
+    expect(await sse.call(message)).toEqual(body);
+    expect(validateMessage(revision, body)).toEqual({ valid: true, errors: [] });
+    expect(validateAgainst(revision, "CallToolResult", body.result)).toEqual({ valid: true, errors: [] });
+    expect(body.result.isError).toBeUndefined();
+    expect(body.result).toMatchSnapshot();
+  });
+});
 
 describe.each(WIRES.map((wire) => [wire.revision, wire] as const))("catalog over %s", (revision, wire) => {
   let running: RunningServer;

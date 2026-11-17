@@ -34,6 +34,7 @@ export const PROFILE_2025_03_26: LegacyProfile = {
 export const endpoint20250326: Endpoint = {
   name: PROFILE_2025_03_26.revision,
   mountPath: `/${PROFILE_2025_03_26.revision}`,
+  entryPaths: ["/mcp"],
   revisions: ["2025-03-26"],
   createRouter: () => legacyRouter([PROFILE_2025_03_26]),
 };

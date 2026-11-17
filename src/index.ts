@@ -8,6 +8,7 @@ const app = createApp();
 app.listen(config.port, () => {
   console.log(`mcp-mock listening on http://localhost:${config.port}`);
   for (const endpoint of endpoints) {
-    console.log(`- ${endpoint.name}: http://localhost:${config.port}${endpoint.mountPath}/mcp`);
+    const urls = endpoint.entryPaths.map((path) => `http://localhost:${config.port}${endpoint.mountPath}${path}`);
+    console.log(`- ${endpoint.name}: ${urls.join(", ")}`);
   }
 });
