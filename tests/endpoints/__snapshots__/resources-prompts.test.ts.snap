@@ -1,0 +1,1148 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`resources and prompts wire format of 2026-07-28 lists resources, templates and prompts 1`] = `
+{
+  "cacheScope": "public",
+  "resources": [
+    {
+      "description": "The application's configuration file.",
+      "mimeType": "application/json",
+      "name": "config.json",
+      "size": 86,
+      "title": "Application configuration",
+      "uri": "file:///etc/app/config.json",
+    },
+    {
+      "description": "The project's README.",
+      "mimeType": "text/markdown",
+      "name": "README.md",
+      "size": 61,
+      "title": "Project README",
+      "uri": "file:///docs/README.md",
+    },
+    {
+      "description": "A small CSV report of scores.",
+      "mimeType": "text/csv",
+      "name": "report.csv",
+      "size": 59,
+      "title": "Score report",
+      "uri": "file:///data/report.csv",
+    },
+    {
+      "description": "A 16x16 PNG logo, read as a base64 blob.",
+      "mimeType": "image/png",
+      "name": "logo.png",
+      "size": 852,
+      "title": "Logo",
+      "uri": "file:///images/logo.png",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 lists resources, templates and prompts 2`] = `
+{
+  "cacheScope": "public",
+  "resourceTemplates": [
+    {
+      "description": "The current weather of a city, as get_weather reports it. "weather://Atlantis" does not exist.",
+      "mimeType": "application/json",
+      "name": "weather",
+      "title": "Current weather",
+      "uriTemplate": "weather://{city}",
+    },
+    {
+      "description": "A user profile, as get_user reports it. "user://missing" does not exist.",
+      "mimeType": "application/json",
+      "name": "user",
+      "title": "User profile",
+      "uriTemplate": "user://{user_id}",
+    },
+    {
+      "description": "Any file of the fake file system read_file serves. "file:///missing" does not exist.",
+      "name": "file",
+      "title": "File",
+      "uriTemplate": "file:///{path}",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 lists resources, templates and prompts 3`] = `
+{
+  "cacheScope": "public",
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "description": "The text to summarize.",
+          "name": "text",
+          "required": true,
+          "title": "Text",
+        },
+        {
+          "description": "brief or detailed. Defaults to brief.",
+          "name": "style",
+          "required": false,
+          "title": "Style",
+        },
+      ],
+      "description": "Asks for a summary of a text.",
+      "name": "summarize",
+      "title": "Summarize text",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The code to review.",
+          "name": "code",
+          "required": true,
+          "title": "Code",
+        },
+        {
+          "description": "The programming language, if known.",
+          "name": "language",
+          "required": false,
+          "title": "Language",
+        },
+      ],
+      "description": "Asks for a review of a piece of code.",
+      "name": "code_review",
+      "title": "Review code",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The city to report on.",
+          "name": "city",
+          "required": true,
+          "title": "City",
+        },
+      ],
+      "description": "Asks for a short weather report, with the city's weather embedded as a resource. "Atlantis" is never found.",
+      "name": "weather_report",
+      "title": "Weather report",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 reads file:///etc/app/config.json 1`] = `
+{
+  "cacheScope": "public",
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": 
+"{
+  "name": "config.json",
+  "version": "1.18.20",
+  "enabled": true,
+  "items": 79
+}
+"
+,
+      "uri": "file:///etc/app/config.json",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 reads file:///docs/README.md 1`] = `
+{
+  "cacheScope": "public",
+  "contents": [
+    {
+      "mimeType": "text/markdown",
+      "text": 
+"# README.md
+
+A news with 5 sections.
+
+- reference
+- tutorial
+"
+,
+      "uri": "file:///docs/README.md",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 reads file:///data/report.csv 1`] = `
+{
+  "cacheScope": "public",
+  "contents": [
+    {
+      "mimeType": "text/csv",
+      "text": 
+"id,name,score
+1,Ken,360
+2,Grace,578
+3,Ada,971
+4,Frances,68
+"
+,
+      "uri": "file:///data/report.csv",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 reads file:///images/logo.png 1`] = `
+{
+  "cacheScope": "public",
+  "contents": [
+    {
+      "blob": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAADG0lEQVR4AQEQA+/8AMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B9cVvhCCnTYoAAAAAElFTkSuQmCC",
+      "mimeType": "image/png",
+      "uri": "file:///images/logo.png",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 reads weather://Oslo 1`] = `
+{
+  "cacheScope": "public",
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"city":"Oslo","temperature":11,"temperature_unit":"°C","conditions":"sunny","humidity":65,"wind_speed":5,"wind_speed_unit":"km/h"}",
+      "uri": "weather://Oslo",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 reads user://u_1 1`] = `
+{
+  "cacheScope": "public",
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"id":"u_1","name":"Tim Allen","email":"tim.allen@example.com","role":"admin","created_at":"2017-05-26"}",
+      "uri": "user://u_1",
+    },
+  ],
+  "resultType": "complete",
+  "ttlMs": 3600000,
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 gets the summarize prompt 1`] = `
+{
+  "description": "A detailed summary",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Summarize the following text in a few paragraphs, keeping every key point:
+
+MCP lets models use tools."
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+  "resultType": "complete",
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 gets the code_review prompt 1`] = `
+{
+  "description": "A review of javascript code",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Review this javascript code for bugs, readability and performance. List each issue with its line and a suggested fix.
+
+let x = 1"
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+  "resultType": "complete",
+}
+`;
+
+exports[`resources and prompts wire format of 2026-07-28 gets the weather_report prompt 1`] = `
+{
+  "description": "A weather report for Madrid",
+  "messages": [
+    {
+      "content": {
+        "text": "Write a short, friendly weather report for Madrid from this data:",
+        "type": "text",
+      },
+      "role": "user",
+    },
+    {
+      "content": {
+        "resource": {
+          "mimeType": "application/json",
+          "text": "{"city":"Madrid","temperature":14,"temperature_unit":"°C","conditions":"thunderstorm","humidity":42,"wind_speed":55,"wind_speed_unit":"km/h"}",
+          "uri": "weather://Madrid",
+        },
+        "type": "resource",
+      },
+      "role": "user",
+    },
+  ],
+  "resultType": "complete",
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 lists resources, templates and prompts 1`] = `
+{
+  "resources": [
+    {
+      "description": "The application's configuration file.",
+      "mimeType": "application/json",
+      "name": "config.json",
+      "size": 86,
+      "title": "Application configuration",
+      "uri": "file:///etc/app/config.json",
+    },
+    {
+      "description": "The project's README.",
+      "mimeType": "text/markdown",
+      "name": "README.md",
+      "size": 61,
+      "title": "Project README",
+      "uri": "file:///docs/README.md",
+    },
+    {
+      "description": "A small CSV report of scores.",
+      "mimeType": "text/csv",
+      "name": "report.csv",
+      "size": 59,
+      "title": "Score report",
+      "uri": "file:///data/report.csv",
+    },
+    {
+      "description": "A 16x16 PNG logo, read as a base64 blob.",
+      "mimeType": "image/png",
+      "name": "logo.png",
+      "size": 852,
+      "title": "Logo",
+      "uri": "file:///images/logo.png",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 lists resources, templates and prompts 2`] = `
+{
+  "resourceTemplates": [
+    {
+      "description": "The current weather of a city, as get_weather reports it. "weather://Atlantis" does not exist.",
+      "mimeType": "application/json",
+      "name": "weather",
+      "title": "Current weather",
+      "uriTemplate": "weather://{city}",
+    },
+    {
+      "description": "A user profile, as get_user reports it. "user://missing" does not exist.",
+      "mimeType": "application/json",
+      "name": "user",
+      "title": "User profile",
+      "uriTemplate": "user://{user_id}",
+    },
+    {
+      "description": "Any file of the fake file system read_file serves. "file:///missing" does not exist.",
+      "name": "file",
+      "title": "File",
+      "uriTemplate": "file:///{path}",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 lists resources, templates and prompts 3`] = `
+{
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "description": "The text to summarize.",
+          "name": "text",
+          "required": true,
+          "title": "Text",
+        },
+        {
+          "description": "brief or detailed. Defaults to brief.",
+          "name": "style",
+          "required": false,
+          "title": "Style",
+        },
+      ],
+      "description": "Asks for a summary of a text.",
+      "name": "summarize",
+      "title": "Summarize text",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The code to review.",
+          "name": "code",
+          "required": true,
+          "title": "Code",
+        },
+        {
+          "description": "The programming language, if known.",
+          "name": "language",
+          "required": false,
+          "title": "Language",
+        },
+      ],
+      "description": "Asks for a review of a piece of code.",
+      "name": "code_review",
+      "title": "Review code",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The city to report on.",
+          "name": "city",
+          "required": true,
+          "title": "City",
+        },
+      ],
+      "description": "Asks for a short weather report, with the city's weather embedded as a resource. "Atlantis" is never found.",
+      "name": "weather_report",
+      "title": "Weather report",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 reads file:///etc/app/config.json 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": 
+"{
+  "name": "config.json",
+  "version": "1.18.20",
+  "enabled": true,
+  "items": 79
+}
+"
+,
+      "uri": "file:///etc/app/config.json",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 reads file:///docs/README.md 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "text/markdown",
+      "text": 
+"# README.md
+
+A news with 5 sections.
+
+- reference
+- tutorial
+"
+,
+      "uri": "file:///docs/README.md",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 reads file:///data/report.csv 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "text/csv",
+      "text": 
+"id,name,score
+1,Ken,360
+2,Grace,578
+3,Ada,971
+4,Frances,68
+"
+,
+      "uri": "file:///data/report.csv",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 reads file:///images/logo.png 1`] = `
+{
+  "contents": [
+    {
+      "blob": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAADG0lEQVR4AQEQA+/8AMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B9cVvhCCnTYoAAAAAElFTkSuQmCC",
+      "mimeType": "image/png",
+      "uri": "file:///images/logo.png",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 reads weather://Oslo 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"city":"Oslo","temperature":11,"temperature_unit":"°C","conditions":"sunny","humidity":65,"wind_speed":5,"wind_speed_unit":"km/h"}",
+      "uri": "weather://Oslo",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 reads user://u_1 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"id":"u_1","name":"Tim Allen","email":"tim.allen@example.com","role":"admin","created_at":"2017-05-26"}",
+      "uri": "user://u_1",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 gets the summarize prompt 1`] = `
+{
+  "description": "A detailed summary",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Summarize the following text in a few paragraphs, keeping every key point:
+
+MCP lets models use tools."
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 gets the code_review prompt 1`] = `
+{
+  "description": "A review of javascript code",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Review this javascript code for bugs, readability and performance. List each issue with its line and a suggested fix.
+
+let x = 1"
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-11-25 gets the weather_report prompt 1`] = `
+{
+  "description": "A weather report for Madrid",
+  "messages": [
+    {
+      "content": {
+        "text": "Write a short, friendly weather report for Madrid from this data:",
+        "type": "text",
+      },
+      "role": "user",
+    },
+    {
+      "content": {
+        "resource": {
+          "mimeType": "application/json",
+          "text": "{"city":"Madrid","temperature":14,"temperature_unit":"°C","conditions":"thunderstorm","humidity":42,"wind_speed":55,"wind_speed_unit":"km/h"}",
+          "uri": "weather://Madrid",
+        },
+        "type": "resource",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 lists resources, templates and prompts 1`] = `
+{
+  "resources": [
+    {
+      "description": "The application's configuration file.",
+      "mimeType": "application/json",
+      "name": "config.json",
+      "size": 86,
+      "title": "Application configuration",
+      "uri": "file:///etc/app/config.json",
+    },
+    {
+      "description": "The project's README.",
+      "mimeType": "text/markdown",
+      "name": "README.md",
+      "size": 61,
+      "title": "Project README",
+      "uri": "file:///docs/README.md",
+    },
+    {
+      "description": "A small CSV report of scores.",
+      "mimeType": "text/csv",
+      "name": "report.csv",
+      "size": 59,
+      "title": "Score report",
+      "uri": "file:///data/report.csv",
+    },
+    {
+      "description": "A 16x16 PNG logo, read as a base64 blob.",
+      "mimeType": "image/png",
+      "name": "logo.png",
+      "size": 852,
+      "title": "Logo",
+      "uri": "file:///images/logo.png",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 lists resources, templates and prompts 2`] = `
+{
+  "resourceTemplates": [
+    {
+      "description": "The current weather of a city, as get_weather reports it. "weather://Atlantis" does not exist.",
+      "mimeType": "application/json",
+      "name": "weather",
+      "title": "Current weather",
+      "uriTemplate": "weather://{city}",
+    },
+    {
+      "description": "A user profile, as get_user reports it. "user://missing" does not exist.",
+      "mimeType": "application/json",
+      "name": "user",
+      "title": "User profile",
+      "uriTemplate": "user://{user_id}",
+    },
+    {
+      "description": "Any file of the fake file system read_file serves. "file:///missing" does not exist.",
+      "name": "file",
+      "title": "File",
+      "uriTemplate": "file:///{path}",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 lists resources, templates and prompts 3`] = `
+{
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "description": "The text to summarize.",
+          "name": "text",
+          "required": true,
+          "title": "Text",
+        },
+        {
+          "description": "brief or detailed. Defaults to brief.",
+          "name": "style",
+          "required": false,
+          "title": "Style",
+        },
+      ],
+      "description": "Asks for a summary of a text.",
+      "name": "summarize",
+      "title": "Summarize text",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The code to review.",
+          "name": "code",
+          "required": true,
+          "title": "Code",
+        },
+        {
+          "description": "The programming language, if known.",
+          "name": "language",
+          "required": false,
+          "title": "Language",
+        },
+      ],
+      "description": "Asks for a review of a piece of code.",
+      "name": "code_review",
+      "title": "Review code",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The city to report on.",
+          "name": "city",
+          "required": true,
+          "title": "City",
+        },
+      ],
+      "description": "Asks for a short weather report, with the city's weather embedded as a resource. "Atlantis" is never found.",
+      "name": "weather_report",
+      "title": "Weather report",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 reads file:///etc/app/config.json 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": 
+"{
+  "name": "config.json",
+  "version": "1.18.20",
+  "enabled": true,
+  "items": 79
+}
+"
+,
+      "uri": "file:///etc/app/config.json",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 reads file:///docs/README.md 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "text/markdown",
+      "text": 
+"# README.md
+
+A news with 5 sections.
+
+- reference
+- tutorial
+"
+,
+      "uri": "file:///docs/README.md",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 reads file:///data/report.csv 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "text/csv",
+      "text": 
+"id,name,score
+1,Ken,360
+2,Grace,578
+3,Ada,971
+4,Frances,68
+"
+,
+      "uri": "file:///data/report.csv",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 reads file:///images/logo.png 1`] = `
+{
+  "contents": [
+    {
+      "blob": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAADG0lEQVR4AQEQA+/8AMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B9cVvhCCnTYoAAAAAElFTkSuQmCC",
+      "mimeType": "image/png",
+      "uri": "file:///images/logo.png",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 reads weather://Oslo 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"city":"Oslo","temperature":11,"temperature_unit":"°C","conditions":"sunny","humidity":65,"wind_speed":5,"wind_speed_unit":"km/h"}",
+      "uri": "weather://Oslo",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 reads user://u_1 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"id":"u_1","name":"Tim Allen","email":"tim.allen@example.com","role":"admin","created_at":"2017-05-26"}",
+      "uri": "user://u_1",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 gets the summarize prompt 1`] = `
+{
+  "description": "A detailed summary",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Summarize the following text in a few paragraphs, keeping every key point:
+
+MCP lets models use tools."
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 gets the code_review prompt 1`] = `
+{
+  "description": "A review of javascript code",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Review this javascript code for bugs, readability and performance. List each issue with its line and a suggested fix.
+
+let x = 1"
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-06-18 gets the weather_report prompt 1`] = `
+{
+  "description": "A weather report for Madrid",
+  "messages": [
+    {
+      "content": {
+        "text": "Write a short, friendly weather report for Madrid from this data:",
+        "type": "text",
+      },
+      "role": "user",
+    },
+    {
+      "content": {
+        "resource": {
+          "mimeType": "application/json",
+          "text": "{"city":"Madrid","temperature":14,"temperature_unit":"°C","conditions":"thunderstorm","humidity":42,"wind_speed":55,"wind_speed_unit":"km/h"}",
+          "uri": "weather://Madrid",
+        },
+        "type": "resource",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 lists resources, templates and prompts 1`] = `
+{
+  "resources": [
+    {
+      "description": "The application's configuration file.",
+      "mimeType": "application/json",
+      "name": "config.json",
+      "size": 86,
+      "uri": "file:///etc/app/config.json",
+    },
+    {
+      "description": "The project's README.",
+      "mimeType": "text/markdown",
+      "name": "README.md",
+      "size": 61,
+      "uri": "file:///docs/README.md",
+    },
+    {
+      "description": "A small CSV report of scores.",
+      "mimeType": "text/csv",
+      "name": "report.csv",
+      "size": 59,
+      "uri": "file:///data/report.csv",
+    },
+    {
+      "description": "A 16x16 PNG logo, read as a base64 blob.",
+      "mimeType": "image/png",
+      "name": "logo.png",
+      "size": 852,
+      "uri": "file:///images/logo.png",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 lists resources, templates and prompts 2`] = `
+{
+  "resourceTemplates": [
+    {
+      "description": "The current weather of a city, as get_weather reports it. "weather://Atlantis" does not exist.",
+      "mimeType": "application/json",
+      "name": "weather",
+      "uriTemplate": "weather://{city}",
+    },
+    {
+      "description": "A user profile, as get_user reports it. "user://missing" does not exist.",
+      "mimeType": "application/json",
+      "name": "user",
+      "uriTemplate": "user://{user_id}",
+    },
+    {
+      "description": "Any file of the fake file system read_file serves. "file:///missing" does not exist.",
+      "name": "file",
+      "uriTemplate": "file:///{path}",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 lists resources, templates and prompts 3`] = `
+{
+  "prompts": [
+    {
+      "arguments": [
+        {
+          "description": "The text to summarize.",
+          "name": "text",
+          "required": true,
+        },
+        {
+          "description": "brief or detailed. Defaults to brief.",
+          "name": "style",
+          "required": false,
+        },
+      ],
+      "description": "Asks for a summary of a text.",
+      "name": "summarize",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The code to review.",
+          "name": "code",
+          "required": true,
+        },
+        {
+          "description": "The programming language, if known.",
+          "name": "language",
+          "required": false,
+        },
+      ],
+      "description": "Asks for a review of a piece of code.",
+      "name": "code_review",
+    },
+    {
+      "arguments": [
+        {
+          "description": "The city to report on.",
+          "name": "city",
+          "required": true,
+        },
+      ],
+      "description": "Asks for a short weather report, with the city's weather embedded as a resource. "Atlantis" is never found.",
+      "name": "weather_report",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 reads file:///etc/app/config.json 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": 
+"{
+  "name": "config.json",
+  "version": "1.18.20",
+  "enabled": true,
+  "items": 79
+}
+"
+,
+      "uri": "file:///etc/app/config.json",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 reads file:///docs/README.md 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "text/markdown",
+      "text": 
+"# README.md
+
+A news with 5 sections.
+
+- reference
+- tutorial
+"
+,
+      "uri": "file:///docs/README.md",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 reads file:///data/report.csv 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "text/csv",
+      "text": 
+"id,name,score
+1,Ken,360
+2,Grace,578
+3,Ada,971
+4,Frances,68
+"
+,
+      "uri": "file:///data/report.csv",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 reads file:///images/logo.png 1`] = `
+{
+  "contents": [
+    {
+      "blob": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAADG0lEQVR4AQEQA+/8AMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0BwDD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AfD9AcAw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHw/QHAMP0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B8P0B9cVvhCCnTYoAAAAAElFTkSuQmCC",
+      "mimeType": "image/png",
+      "uri": "file:///images/logo.png",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 reads weather://Oslo 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"city":"Oslo","temperature":11,"temperature_unit":"°C","conditions":"sunny","humidity":65,"wind_speed":5,"wind_speed_unit":"km/h"}",
+      "uri": "weather://Oslo",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 reads user://u_1 1`] = `
+{
+  "contents": [
+    {
+      "mimeType": "application/json",
+      "text": "{"id":"u_1","name":"Tim Allen","email":"tim.allen@example.com","role":"admin","created_at":"2017-05-26"}",
+      "uri": "user://u_1",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 gets the summarize prompt 1`] = `
+{
+  "description": "A detailed summary",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Summarize the following text in a few paragraphs, keeping every key point:
+
+MCP lets models use tools."
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 gets the code_review prompt 1`] = `
+{
+  "description": "A review of javascript code",
+  "messages": [
+    {
+      "content": {
+        "text": 
+"Review this javascript code for bugs, readability and performance. List each issue with its line and a suggested fix.
+
+let x = 1"
+,
+        "type": "text",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;
+
+exports[`resources and prompts wire format of 2025-03-26 gets the weather_report prompt 1`] = `
+{
+  "description": "A weather report for Madrid",
+  "messages": [
+    {
+      "content": {
+        "text": "Write a short, friendly weather report for Madrid from this data:",
+        "type": "text",
+      },
+      "role": "user",
+    },
+    {
+      "content": {
+        "resource": {
+          "mimeType": "application/json",
+          "text": "{"city":"Madrid","temperature":14,"temperature_unit":"°C","conditions":"thunderstorm","humidity":42,"wind_speed":55,"wind_speed_unit":"km/h"}",
+          "uri": "weather://Madrid",
+        },
+        "type": "resource",
+      },
+      "role": "user",
+    },
+  ],
+}
+`;

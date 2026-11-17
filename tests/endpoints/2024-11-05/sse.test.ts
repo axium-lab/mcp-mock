@@ -42,7 +42,7 @@ describe("2024-11-05 over raw HTTP+SSE", () => {
     const body = JSON.parse(message.data);
     expect(body.result).toEqual({
       protocolVersion: REVISION,
-      capabilities: { tools: {} },
+      capabilities: { tools: {}, resources: {}, prompts: {} },
       serverInfo: { name: "mcp-mock", version: "0.0.0" },
     });
     expect(validateMessage(REVISION, body)).toEqual({ valid: true, errors: [] });
@@ -79,7 +79,7 @@ describe("2024-11-05 over raw HTTP+SSE", () => {
 
   it("answers unknown methods on the stream with -32601", async () => {
     const sse = await openSse(url);
-    const body = await sse.call({ jsonrpc: "2.0", id: 1, method: "resources/list" });
+    const body = await sse.call({ jsonrpc: "2.0", id: 1, method: "completion/complete" });
     expect(body.error.code).toBe(-32601);
     sse.close();
   });

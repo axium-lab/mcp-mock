@@ -1,6 +1,8 @@
 import { withControl } from "../../core/control.ts";
-import type { Handlers } from "../../core/jsonrpc.ts";
+import { ErrorCode, type Handlers } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
+import { getPrompt, listPrompts } from "../../prompts/index.ts";
+import { listResources, listResourceTemplates, readResource } from "../../resources/index.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
 import { isInputRequired } from "../../tools/types.ts";
 import { META } from "./envelope.ts";
@@ -28,9 +30,32 @@ export const handlers: Handlers<RequestContext> = withControl({
     "server/discover": () =>
       complete({
         supportedVersions: [REVISION],
-        capabilities: { tools: {} },
+        capabilities: { tools: {}, resources: {}, prompts: {} },
         ...CACHE_HINTS,
       }),
+
+    "resources/list": (params) => {
+      checkNoCursor(params);
+      return complete({ resources: listResources(), ...CACHE_HINTS });
+    },
+
+    "resources/templates/list": (params) => {
+      checkNoCursor(params);
+      return complete({ resourceTemplates: listResourceTemplates(), ...CACHE_HINTS });
+    },
+
+    // resources/read is cacheable too. A missing resource is -32602 (Invalid
+    // Params) since this revision, no longer -32002.
+    "resources/read": (params) => complete({ ...readResource(params, ErrorCode.InvalidParams), ...CACHE_HINTS }),
+
+    "prompts/list": (params) => {
+      checkNoCursor(params);
+      return complete({ prompts: listPrompts(), ...CACHE_HINTS });
+    },
+
+    // prompts/get depends on its arguments and is not among the cacheable
+    // results.
+    "prompts/get": (params) => complete(getPrompt(params)),
 
     "tools/list": (params) => {
       checkNoCursor(params);

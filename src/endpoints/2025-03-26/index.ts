@@ -11,6 +11,8 @@ export const PROFILE_2025_03_26: LegacyProfile = {
   revision: "2025-03-26",
   // Servers MUST accept batches in this revision.
   batching: true,
+  // No display titles on resources or prompts yet.
+  titles: false,
 
   // A tool had only a name, a description, an input schema and annotations.
   // The display title already existed, inside the annotations, so it moves

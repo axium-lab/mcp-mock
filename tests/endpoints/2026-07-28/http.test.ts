@@ -71,7 +71,7 @@ describe("2026-07-28 over raw HTTP", () => {
       expect(reply.headers.get("content-type")).toContain("application/json");
       expect(reply.body.result).toEqual({
         supportedVersions: [REVISION],
-        capabilities: { tools: {} },
+        capabilities: { tools: {}, resources: {}, prompts: {} },
         ttlMs: 3_600_000,
         cacheScope: "public",
         resultType: "complete",
@@ -131,12 +131,12 @@ describe("2026-07-28 over raw HTTP", () => {
     });
 
     it("answers an unknown method with 404 and -32601", async () => {
-      const reply = await post(request("resources/list"));
+      const reply = await post(request("completion/complete"));
       expect(reply.status).toBe(404);
       expect(reply.body).toEqual({
         jsonrpc: "2.0",
         id: 1,
-        error: { code: -32601, message: "Method not found: resources/list" },
+        error: { code: -32601, message: "Method not found: completion/complete" },
       });
       expectValid(reply);
     });

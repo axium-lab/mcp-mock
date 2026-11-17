@@ -45,6 +45,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - A 21st tool, `delete_file`, asks for confirmation before deleting (nothing is really deleted). On 2026-07-28 its first call answers `input_required` with a form elicitation, and the retry completes or is cancelled according to the answer. The `requestState` binds the confirmation to the file, so it cannot be replayed on another path. A client that does not declare form elicitation gets `MissingRequiredClientCapabilityError` (`-32021`, HTTP 400). Legacy revisions, which cannot ask, delete without asking, leaving confirmation to the client as the `destructiveHint` annotation did in 2025.
   - `_meta["com.mcp-mock/input-required"]` forces any `inputRequests` and `requestState` on a `tools/call`. The retry, recognised by its `inputResponses` or `requestState`, gets the forced result if one is given, and otherwise returns what the client answered, so a test can check its client's side of the round trip. It is refused on legacy revisions.
 
+- Resources and prompts on every revision, declared as capabilities next to tools:
+  - `resources/list` serves four fake files (JSON, Markdown, CSV and a PNG read as a base64 blob), and `resources/templates/list` three templates: `weather://{city}`, `user://{user_id}` and `file:///{path}`. `resources/read` draws on the same deterministic world as the tools, so `weather://Madrid` reads what `get_weather` reports. A missing resource is `-32002` up to 2025-11-25 and `-32602` from 2026-07-28, as each revision defines it.
+  - `prompts/list` and `prompts/get` serve `summarize`, `code_review` and `weather_report`, the last one with the city's weather embedded as a resource. Unknown prompts and missing, unknown or non-string arguments are `-32602`.
+  - On 2026-07-28 the list results and `resources/read` carry cache hints, and `resources/read` and `prompts/get` require the `Mcp-Name` header. Before 2025-06-18, display titles are left out.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

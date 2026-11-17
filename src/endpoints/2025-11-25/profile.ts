@@ -16,6 +16,9 @@ export interface LegacyProfile {
   // Whether a POST body may be a JSON-RPC batch: only in 2025-03-26, which
   // required servers to accept them; 2025-06-18 removed them.
   batching: boolean;
+  // Whether resources, resource templates, prompts and prompt arguments have
+  // a display `title`, which arrived in 2025-06-18.
+  titles: boolean;
   // The catalog in this revision's vocabulary, for revisions that predate
   // parts of it. Omitted when the catalog is served as it is.
   adaptDefinition?: (definition: ToolDefinition) => Record<string, unknown>;
@@ -27,6 +30,7 @@ export const PROFILE_2025_11_25: LegacyProfile = {
   invalidArguments: "tool-error",
   unreadableId: "omit",
   batching: false,
+  titles: true,
 };
 
 export function shapeFor(profile: LegacyProfile) {

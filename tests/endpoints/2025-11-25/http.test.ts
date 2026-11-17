@@ -71,7 +71,7 @@ describe("2025-11-25 over raw HTTP", () => {
       expect(reply.status).toBe(200);
       expect(reply.body.result).toEqual({
         protocolVersion: REVISION,
-        capabilities: { tools: {} },
+        capabilities: { tools: {}, resources: {}, prompts: {} },
         serverInfo: { name: "mcp-mock", version: "0.0.0" },
       });
       expect(reply.headers.get("mcp-session-id")).toBeNull();
@@ -148,7 +148,7 @@ describe("2025-11-25 over raw HTTP", () => {
     });
 
     it("answers an unknown method in-band with -32601", async () => {
-      const reply = await post(request("resources/list"));
+      const reply = await post(request("completion/complete"));
       expect(reply.status).toBe(200);
       expect(reply.body.error.code).toBe(-32601);
       expectValid(reply);

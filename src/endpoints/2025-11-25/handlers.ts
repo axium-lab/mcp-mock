@@ -1,12 +1,25 @@
 import { withControl } from "../../core/control.ts";
 import { ErrorCode, type Handlers, JsonRpcError } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
+import { getPrompt, listPrompts } from "../../prompts/index.ts";
+import { listResources, listResourceTemplates, readResource } from "../../resources/index.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
 import { isInputRequired } from "../../tools/types.ts";
 import type { LegacyProfile } from "./profile.ts";
 
+// Resource not found, a code of the legacy revisions; 2026-07-28 replaced it
+// with -32602.
+const RESOURCE_NOT_FOUND = -32002;
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// Drops the display title from a definition, for revisions before
+// 2025-06-18, which had none.
+function withoutTitle<T extends { title?: string }>(definition: T): Omit<T, "title"> {
+  const { title: _title, ...rest } = definition;
+  return rest;
 }
 
 // The methods of a legacy revision. Results are plain objects: resultType,
@@ -14,6 +27,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, never>> {
   const adaptDefinition = profile.adaptDefinition ?? ((definition) => ({ ...definition }));
   const adaptResult = profile.adaptResult ?? ((result) => ({ ...result }));
+  const titled = <T extends { title?: string }>(definition: T) => (profile.titles ? definition : withoutTitle(definition));
 
   // withControl lets a request force a JSON-RPC error from the test.
   return withControl({
@@ -36,7 +50,7 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, 
         }
         return {
           protocolVersion: profile.revision,
-          capabilities: { tools: {} },
+          capabilities: { tools: {}, resources: {}, prompts: {} },
           serverInfo: SERVER_INFO,
         };
       },
@@ -55,6 +69,29 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, 
         if (isInputRequired(result)) throw new Error("input_required outside 2026-07-28");
         return adaptResult(result);
       },
+
+      "resources/list": (params) => {
+        checkNoCursor(params);
+        return { resources: listResources().map(titled) };
+      },
+
+      "resources/templates/list": (params) => {
+        checkNoCursor(params);
+        return { resourceTemplates: listResourceTemplates().map(titled) };
+      },
+
+      "resources/read": (params) => readResource(params, RESOURCE_NOT_FOUND),
+
+      "prompts/list": (params) => {
+        checkNoCursor(params);
+        return {
+          prompts: listPrompts().map((prompt) =>
+            profile.titles ? prompt : { ...withoutTitle(prompt), arguments: prompt.arguments.map(withoutTitle) },
+          ),
+        };
+      },
+
+      "prompts/get": (params) => getPrompt(params),
     },
   });
 }

@@ -30,6 +30,28 @@ function contents(extension: string, path: string): string {
   }
 }
 
+export type FakeFile =
+  | { ok: true; path: string; uri: string; mimeType: string; text: string }
+  | { ok: false; reason: "outside-root" | "not-found"; path: string };
+
+// The fake file system, shared by the read_file tool and the file:// resources.
+// Same path, same contents, whichever way it is read.
+export function readFakeFile(path: string): FakeFile {
+  const value = path.trim();
+  if (value.split("/").includes("..")) return { ok: false, reason: "outside-root", path: value };
+  const absolute = value.startsWith("/") ? value : `/${value}`;
+  if (absolute === RESERVED.filePath) return { ok: false, reason: "not-found", path: absolute };
+
+  const extension = absolute.includes(".") ? (absolute.split(".").pop() as string).toLowerCase() : "";
+  return {
+    ok: true,
+    path: absolute,
+    uri: `file://${absolute}`,
+    mimeType: MIME_TYPES[extension] ?? "text/plain",
+    text: contents(extension, absolute),
+  };
+}
+
 // Returns the file as an embedded resource, the content type for handing over
 // the thing itself rather than a link to it.
 export const readFile: Tool = {
@@ -46,20 +68,16 @@ export const readFile: Tool = {
     annotations: LOOKUP,
   },
   run: ({ path }) => {
-    const value = (path as string).trim();
-    if (value.split("/").includes("..")) return toolError(`Access denied: "${value}" leaves the root directory`);
-    const absolute = value.startsWith("/") ? value : `/${value}`;
-    if (absolute === RESERVED.filePath) return toolError(`File not found: ${absolute}`);
-
-    const extension = absolute.includes(".") ? (absolute.split(".").pop() as string).toLowerCase() : "";
-    const mimeType = MIME_TYPES[extension] ?? "text/plain";
+    const file = readFakeFile(path as string);
+    if (!file.ok) {
+      return toolError(
+        file.reason === "outside-root"
+          ? `Access denied: "${file.path}" leaves the root directory`
+          : `File not found: ${file.path}`,
+      );
+    }
     return {
-      content: [
-        {
-          type: "resource",
-          resource: { uri: `file://${absolute}`, mimeType, text: contents(extension, absolute) },
-        },
-      ],
+      content: [{ type: "resource", resource: { uri: file.uri, mimeType: file.mimeType, text: file.text } }],
     };
   },
 };

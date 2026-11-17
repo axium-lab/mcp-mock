@@ -14,6 +14,8 @@ export const PROFILE_2025_06_18: LegacyProfile = {
   unreadableId: "null",
   // This revision removed batching.
   batching: false,
+  // Titles arrived in this revision.
+  titles: true,
 };
 
 export const endpoint20250618: Endpoint = {
