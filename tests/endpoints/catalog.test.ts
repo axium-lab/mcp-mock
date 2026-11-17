@@ -109,7 +109,11 @@ describe.each(WIRES.map((wire) => [wire.revision, wire] as const))("catalog over
     expect(body.result.tools).toMatchSnapshot();
   });
 
-  it.each(TOOL_NAMES)("calls %s", async (name) => {
+  // On 2026-07-28 delete_file asks for confirmation first (MRTR), which
+  // tests/endpoints/mrtr.test.ts covers; everywhere else it completes.
+  const callable = revision === "2026-07-28" ? TOOL_NAMES.filter((name) => name !== "delete_file") : TOOL_NAMES;
+
+  it.each(callable)("calls %s", async (name) => {
     const params = { name, arguments: SAMPLES[name] };
     const text = await rpc("tools/call", params, name);
     expect(await rpc("tools/call", params, name)).toBe(text);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { callTool, listTools } from "../../src/tools/index.ts";
+import type { ToolResult } from "../../src/tools/types.ts";
 import { validateArgs } from "../../src/tools/validate.ts";
 import { SAMPLES, TOOL_NAMES } from "../catalog.ts";
 
@@ -17,7 +18,8 @@ describe.each(listTools().map((tool) => [tool.name, tool] as const))("%s", (name
   });
 
   it("returns structured content that matches its output schema", () => {
-    const result = callTool({ name, arguments: SAMPLES[name] });
+    // Without an MRTR context every tool completes, delete_file included.
+    const result = callTool({ name, arguments: SAMPLES[name] }) as ToolResult;
     expect(result.isError).toBeUndefined();
     if (tool.outputSchema) {
       const validate = ajv.compile(tool.outputSchema);

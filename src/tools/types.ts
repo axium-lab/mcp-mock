@@ -34,10 +34,38 @@ export interface ToolResult {
 
 export type Args = Record<string, unknown>;
 
+// Multi round-trip requests (MRTR), 2026-07-28 only: instead of a result, a
+// tool may answer that it needs input from the client first. The client
+// gathers it and retries the call with `inputResponses`, echoing
+// `requestState` untouched.
+export interface InputRequired {
+  resultType: "input_required";
+  inputRequests?: Record<string, Record<string, unknown>>;
+  requestState?: string;
+}
+
+export interface CallContext {
+  // Present only where the revision has MRTR. Absent, a tool must complete
+  // without asking: legacy revisions cannot carry an input request.
+  mrtr?: {
+    clientCapabilities: Record<string, unknown>;
+    inputResponses?: Record<string, unknown>;
+    requestState?: string;
+  };
+}
+
+// MissingRequiredClientCapability, the 2026-07-28 error for a request that
+// needs a capability the client did not declare. Only thrown under MRTR.
+export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32021;
+
 export interface Tool {
   definition: ToolDefinition;
   // Receives arguments already validated against the input schema.
-  run(args: Args): ToolResult;
+  run(args: Args, context: CallContext): ToolResult | InputRequired;
+}
+
+export function isInputRequired(result: ToolResult | InputRequired): result is InputRequired {
+  return (result as InputRequired).resultType === "input_required";
 }
 
 // A result whose data is also given as JSON text: the spec asks tools that

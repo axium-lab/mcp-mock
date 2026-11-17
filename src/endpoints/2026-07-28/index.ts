@@ -2,6 +2,7 @@ import express, { type Request, type Response, Router } from "express";
 import { dispatch, parseJson } from "../../core/jsonrpc.ts";
 import type { Endpoint } from "../types.ts";
 import { classify } from "./classify.ts";
+import { McpErrorCode } from "./errors.ts";
 import { handlers, REVISION } from "./handlers.ts";
 import {
   bodyErrorHandler,
@@ -39,11 +40,15 @@ export async function serveModern(body: unknown, req: Request, res: Response): P
   }
 
   // Handler errors (invalid params, unknown tool) travel in-band: the HTTP
-  // exchange succeeded even though the JSON-RPC call did not.
+  // exchange succeeded even though the JSON-RPC call did not. The one
+  // exception is a missing client capability, whose 400 the spec ties to the
+  // error itself, wherever it is raised.
   const response = await dispatch(classified.message, handlers, {
     protocolVersion: classified.protocolVersion,
   });
-  res.status(200).json(response);
+  const missingCapability =
+    response !== undefined && "error" in response && response.error.code === McpErrorCode.MissingRequiredClientCapability;
+  res.status(missingCapability ? 400 : 200).json(response);
 }
 
 async function handlePost(req: Request, res: Response): Promise<void> {

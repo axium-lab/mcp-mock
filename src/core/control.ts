@@ -15,6 +15,7 @@ import { ErrorCode, type Handlers, JsonRpcError } from "./jsonrpc.ts";
 export const CONTROL = {
   response: "com.mcp-mock/response",
   error: "com.mcp-mock/error",
+  inputRequired: "com.mcp-mock/input-required",
   statusHeader: "x-mcp-mock-status",
 } as const;
 
@@ -76,6 +77,45 @@ export function forcedResult(params: Record<string, unknown> | undefined): Force
     content: blocks,
     ...(structuredContent !== undefined && { structuredContent: structuredContent as Record<string, unknown> }),
     ...(isError !== undefined && { isError: isError as boolean }),
+  };
+}
+
+export interface ForcedInputRequired {
+  inputRequests?: Record<string, Record<string, unknown>>;
+  requestState?: string;
+}
+
+// The input_required answer a tools/call forces (2026-07-28 only), or
+// undefined when it forces none. Its input requests are passed through as
+// given, even for capabilities the client did not declare, so a test can
+// check how its client copes.
+export function forcedInputRequired(
+  params: Record<string, unknown> | undefined,
+): ForcedInputRequired | undefined {
+  const value = controlOf(params, CONTROL.inputRequired);
+  if (value === undefined) return undefined;
+  const key = CONTROL.inputRequired;
+  if (!isObject(value)) throw invalid(key, "expected an object");
+
+  const { inputRequests, requestState } = value;
+  const unknown = Object.keys(value).filter((field) => !["inputRequests", "requestState"].includes(field));
+  if (unknown.length > 0) throw invalid(key, `unknown field(s): ${unknown.join(", ")}`);
+  if (
+    inputRequests !== undefined &&
+    (!isObject(inputRequests) ||
+      !Object.values(inputRequests).every((request) => isObject(request) && typeof request.method === "string"))
+  ) {
+    throw invalid(key, '"inputRequests" must map ids to requests, each with a string "method"');
+  }
+  if (requestState !== undefined && typeof requestState !== "string") {
+    throw invalid(key, '"requestState" must be a string');
+  }
+  if (inputRequests === undefined && requestState === undefined) {
+    throw invalid(key, 'give at least one of "inputRequests" or "requestState", as the spec requires');
+  }
+  return {
+    ...(inputRequests !== undefined && { inputRequests: inputRequests as Record<string, Record<string, unknown>> }),
+    ...(requestState !== undefined && { requestState: requestState as string }),
   };
 }
 

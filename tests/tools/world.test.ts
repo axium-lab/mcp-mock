@@ -4,7 +4,7 @@ import type { ToolResult } from "../../src/tools/types.ts";
 
 // The fake world: deterministic per argument, normalized, internally
 // consistent, and failing only on the documented reserved values.
-const call = (name: string, args: Record<string, unknown>): ToolResult => callTool({ name, arguments: args });
+const call = (name: string, args: Record<string, unknown>): ToolResult => callTool({ name, arguments: args }) as ToolResult;
 // Arbitrary structured data: each test asserts the fields it expects.
 const data = (name: string, args: Record<string, unknown>) => call(name, args).structuredContent as any;
 

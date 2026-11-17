@@ -1,4 +1,4 @@
-import { forcedResult } from "../core/control.ts";
+import { CONTROL, forcedInputRequired, forcedResult } from "../core/control.ts";
 import { ErrorCode, JsonRpcError } from "../core/jsonrpc.ts";
 import { add } from "./calc/add.ts";
 import { calculate } from "./calc/calculate.ts";
@@ -10,11 +10,19 @@ import { hashText } from "./calc/hash-text.ts";
 import { sortList } from "./calc/sort-list.ts";
 import { textStats } from "./calc/text-stats.ts";
 import { transformText } from "./calc/transform-text.ts";
-import type { Tool, ToolDefinition, ToolResult } from "./types.ts";
+import {
+  type CallContext,
+  type InputRequired,
+  structured,
+  type Tool,
+  type ToolDefinition,
+  type ToolResult,
+} from "./types.ts";
 import { validateArgs } from "./validate.ts";
 import { convertCurrency, getStockPrice } from "./world/finance.ts";
 import { getUser, sendEmail } from "./world/people.ts";
 import { geocode, getFlightStatus } from "./world/places.ts";
+import { deleteFile } from "./world/delete-file.ts";
 import { readFile } from "./world/read-file.ts";
 import { searchWeb } from "./world/search-web.ts";
 import { getForecast, getWeather } from "./world/weather.ts";
@@ -42,6 +50,7 @@ const TOOLS: readonly Tool[] = [
   geocode,
   getFlightStatus,
   readFile,
+  deleteFile,
   sendEmail,
 ];
 
@@ -58,6 +67,9 @@ export interface CallOptions {
   // them a tool execution error (isError) so the model can self-correct;
   // 2025-06-18 and earlier listed "invalid arguments" among protocol errors.
   invalidArguments?: "tool-error" | "protocol-error";
+  // Set by revisions with multi round-trip requests (2026-07-28): what a tool
+  // needs to ask the client for input and read its answers.
+  mrtr?: CallContext["mrtr"];
 }
 
 // tools/call. Protocol errors (thrown) for a request the model cannot fix:
@@ -66,10 +78,32 @@ export interface CallOptions {
 export function callTool(
   params: Record<string, unknown> | undefined,
   options: CallOptions = {},
-): ToolResult {
+): ToolResult | InputRequired {
   const name = params?.name;
   if (typeof name !== "string") {
     throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "name" must be a string');
+  }
+
+  // An input request forced from the test. The client retries with the
+  // same params, _meta included, plus its answers; a retry is recognised by
+  // those answers and is not asked again. It gets the forced result if there
+  // is one, and otherwise what the client answered, for the test to check.
+  const forcedInput = forcedInputRequired(params);
+  if (forcedInput) {
+    if (!options.mrtr) {
+      throw new JsonRpcError(
+        ErrorCode.InvalidParams,
+        `Invalid params: _meta ${CONTROL.inputRequired} needs protocol revision 2026-07-28, the first with multi round-trip requests`,
+      );
+    }
+    const isRetry = params?.inputResponses !== undefined || params?.requestState !== undefined;
+    if (!isRetry) return { resultType: "input_required", ...forcedInput };
+    const forcedAfter = forcedResult(params);
+    if (forcedAfter) return forcedAfter as unknown as ToolResult;
+    return structured({
+      inputResponses: (params?.inputResponses ?? {}) as Record<string, unknown>,
+      ...(params?.requestState !== undefined && { requestState: params.requestState }),
+    });
   }
 
   // A result forced from the test replaces the tool's own, for any name and
@@ -93,7 +127,7 @@ export function callTool(
     }
     return { content: [{ type: "text", text: message }], isError: true };
   }
-  return tool.run(args);
+  return tool.run(args, options.mrtr ? { mrtr: options.mrtr } : {});
 }
 
 // The mock never paginates, so it never issues a cursor: any cursor a client

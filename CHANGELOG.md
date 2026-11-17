@@ -41,6 +41,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - `_meta["com.mcp-mock/error"]` makes any request fail with the given JSON-RPC `code`, `message` and `data`.
   - The `x-mcp-mock-status` header forces an HTTP failure from 400 to 599 on every endpoint and transport, with `Retry-After` on `429`, as `x-llm-mock-status` does in llm-mock. An out-of-range value is refused with `400` rather than ignored.
 
+- Multi round-trip requests (MRTR) on 2026-07-28, kept stateless:
+  - A 21st tool, `delete_file`, asks for confirmation before deleting (nothing is really deleted). On 2026-07-28 its first call answers `input_required` with a form elicitation, and the retry completes or is cancelled according to the answer. The `requestState` binds the confirmation to the file, so it cannot be replayed on another path. A client that does not declare form elicitation gets `MissingRequiredClientCapabilityError` (`-32021`, HTTP 400). Legacy revisions, which cannot ask, delete without asking, leaving confirmation to the client as the `destructiveHint` annotation did in 2025.
+  - `_meta["com.mcp-mock/input-required"]` forces any `inputRequests` and `requestState` on a `tools/call`. The retry, recognised by its `inputResponses` or `requestState`, gets the forced result if one is given, and otherwise returns what the client answered, so a test can check its client's side of the round trip. It is refused on legacy revisions.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

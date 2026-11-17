@@ -31,6 +31,10 @@ export interface ClientOptions {
   mode: VersionNegotiationMode;
   supportedProtocolVersions?: string[];
   fetch?: typeof fetch;
+  // Declares form elicitation and answers it with this handler. On
+  // 2026-07-28 the SDK uses it to fulfil input_required results (MRTR) and
+  // retries the call by itself.
+  onElicit?: (params: Record<string, unknown>) => Record<string, unknown>;
 }
 
 export async function connectClient(url: string, options: ClientOptions): Promise<Client> {
@@ -41,8 +45,13 @@ export async function connectClient(url: string, options: ClientOptions): Promis
       ...(options.supportedProtocolVersions
         ? { supportedProtocolVersions: options.supportedProtocolVersions }
         : {}),
+      ...(options.onElicit ? { capabilities: { elicitation: { form: {} } } } : {}),
     },
   );
+  if (options.onElicit) {
+    const onElicit = options.onElicit;
+    client.setRequestHandler("elicitation/create", (request) => onElicit(request.params) as never);
+  }
   await client.connect(
     new StreamableHTTPClientTransport(new URL(url), options.fetch ? { fetch: options.fetch } : {}),
   );

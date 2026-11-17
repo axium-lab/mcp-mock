@@ -2,6 +2,7 @@ import { withControl } from "../../core/control.ts";
 import type { Handlers } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
+import { isInputRequired } from "../../tools/types.ts";
 import { META } from "./envelope.ts";
 
 export const REVISION = "2026-07-28";
@@ -36,6 +37,24 @@ export const handlers: Handlers<RequestContext> = withControl({
       return complete({ tools: listTools(), ...CACHE_HINTS });
     },
 
-    "tools/call": (params) => complete(callTool(params)),
+    // tools/call may answer input_required (MRTR): the tool asks the client
+    // for input and the client retries with its answers. Such an interim
+    // result is not "complete" and carries no cache hints.
+    "tools/call": (params) => {
+      const meta = (params?._meta ?? {}) as Record<string, unknown>;
+      const result = callTool(params, {
+        mrtr: {
+          clientCapabilities: (meta[META.clientCapabilities] ?? {}) as Record<string, unknown>,
+          ...(params?.inputResponses !== undefined && {
+            inputResponses: params.inputResponses as Record<string, unknown>,
+          }),
+          ...(typeof params?.requestState === "string" && { requestState: params.requestState }),
+        },
+      });
+      if (isInputRequired(result)) {
+        return { ...result, _meta: { [META.serverInfo]: SERVER_INFO } };
+      }
+      return complete(result);
+    },
   },
 });

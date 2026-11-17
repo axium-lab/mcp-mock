@@ -21,6 +21,7 @@ export const TOOL_NAMES = [
   "geocode",
   "get_flight_status",
   "read_file",
+  "delete_file",
   "send_email",
 ];
 
@@ -45,5 +46,6 @@ export const SAMPLES: Record<string, Record<string, unknown>> = {
   geocode: { address: "1 Infinite Loop" },
   get_flight_status: { flight_number: "IB3456" },
   read_file: { path: "/etc/app/config.json" },
+  delete_file: { path: "/tmp/old.log" },
   send_email: { to: "ada@example.com", subject: "Hi", body: "Hello there" },
 };

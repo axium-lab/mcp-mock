@@ -2,6 +2,7 @@ import { withControl } from "../../core/control.ts";
 import { ErrorCode, type Handlers, JsonRpcError } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
+import { isInputRequired } from "../../tools/types.ts";
 import type { LegacyProfile } from "./profile.ts";
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -47,8 +48,13 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, 
         return { tools: listTools().map(adaptDefinition) };
       },
 
-      "tools/call": (params) =>
-        adaptResult(callTool(params, { invalidArguments: profile.invalidArguments })),
+      // No MRTR context: legacy revisions cannot carry an input request, so
+      // tools complete without asking and input_required never comes back.
+      "tools/call": (params) => {
+        const result = callTool(params, { invalidArguments: profile.invalidArguments });
+        if (isInputRequired(result)) throw new Error("input_required outside 2026-07-28");
+        return adaptResult(result);
+      },
     },
   });
 }

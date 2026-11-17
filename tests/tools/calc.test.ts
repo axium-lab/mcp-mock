@@ -5,7 +5,7 @@ import { callTool } from "../../src/tools/index.ts";
 import type { ToolResult } from "../../src/tools/types.ts";
 
 // The real computations: results checked against independent answers.
-const call = (name: string, args: Record<string, unknown>): ToolResult => callTool({ name, arguments: args });
+const call = (name: string, args: Record<string, unknown>): ToolResult => callTool({ name, arguments: args }) as ToolResult;
 const data = (name: string, args: Record<string, unknown>) => call(name, args).structuredContent;
 const errorText = (result: ToolResult) => {
   expect(result.isError).toBe(true);

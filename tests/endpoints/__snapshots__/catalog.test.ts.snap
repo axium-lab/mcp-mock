@@ -1,5 +1,777 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
+exports[`catalog over 2024-11-05 lists the whole catalog 1`] = `
+[
+  {
+    "description": "Returns the given text prefixed with "Echo: ".",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "description": "The text to echo back.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "text",
+      ],
+      "type": "object",
+    },
+    "name": "echo",
+  },
+  {
+    "description": "Adds two numbers.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "description": "The first addend.",
+          "type": "number",
+        },
+        "b": {
+          "description": "The second addend.",
+          "type": "number",
+        },
+      },
+      "required": [
+        "a",
+        "b",
+      ],
+      "type": "object",
+    },
+    "name": "add",
+  },
+  {
+    "description": "Evaluates an arithmetic expression with + - * / % ^ and parentheses, e.g. '(2 + 3) * 4'.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "description": "The expression to evaluate.",
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "expression",
+      ],
+      "type": "object",
+    },
+    "name": "calculate",
+  },
+  {
+    "description": "Converts text to upper case, lower case, reversed, or a URL slug.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "description": "The transformation to apply.",
+          "enum": [
+            "upper",
+            "lower",
+            "reverse",
+            "slug",
+          ],
+          "type": "string",
+        },
+        "text": {
+          "description": "The text to transform.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "text",
+        "operation",
+      ],
+      "type": "object",
+    },
+    "name": "transform_text",
+  },
+  {
+    "description": "Counts the words, characters and lines of a text.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "description": "The text to measure.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "text",
+      ],
+      "type": "object",
+    },
+    "name": "text_stats",
+  },
+  {
+    "description": "Sorts a list of strings by code point, ascending unless told otherwise.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "description": "The strings to sort.",
+          "items": {
+            "type": "string",
+          },
+          "maxItems": 1000,
+          "type": "array",
+        },
+        "order": {
+          "description": "Sort order. Defaults to asc.",
+          "enum": [
+            "asc",
+            "desc",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "items",
+      ],
+      "type": "object",
+    },
+    "name": "sort_list",
+  },
+  {
+    "description": "Converts a value between units of length, mass, time or temperature (c, f and k are Celsius, Fahrenheit and Kelvin).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "description": "The unit of the value.",
+          "enum": [
+            "mm",
+            "cm",
+            "m",
+            "km",
+            "in",
+            "ft",
+            "yd",
+            "mi",
+            "mg",
+            "g",
+            "kg",
+            "oz",
+            "lb",
+            "s",
+            "min",
+            "h",
+            "d",
+            "c",
+            "f",
+            "k",
+          ],
+          "type": "string",
+        },
+        "to": {
+          "description": "The unit to convert to.",
+          "enum": [
+            "mm",
+            "cm",
+            "m",
+            "km",
+            "in",
+            "ft",
+            "yd",
+            "mi",
+            "mg",
+            "g",
+            "kg",
+            "oz",
+            "lb",
+            "s",
+            "min",
+            "h",
+            "d",
+            "c",
+            "f",
+            "k",
+          ],
+          "type": "string",
+        },
+        "value": {
+          "description": "The value to convert.",
+          "type": "number",
+        },
+      },
+      "required": [
+        "value",
+        "from",
+        "to",
+      ],
+      "type": "object",
+    },
+    "name": "convert_units",
+  },
+  {
+    "description": "Computes the hex digest of a UTF-8 text with MD5, SHA-1 or SHA-256.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "description": "The hash algorithm.",
+          "enum": [
+            "md5",
+            "sha1",
+            "sha256",
+          ],
+          "type": "string",
+        },
+        "text": {
+          "description": "The text to hash.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "text",
+        "algorithm",
+      ],
+      "type": "object",
+    },
+    "name": "hash_text",
+  },
+  {
+    "description": "Computes the time from one ISO 8601 date to another. Dates are YYYY-MM-DD (UTC) or date-times with an offset, e.g. 2024-05-01T10:00:00Z.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "description": "The start date.",
+          "type": "string",
+        },
+        "to": {
+          "description": "The end date.",
+          "type": "string",
+        },
+      },
+      "required": [
+        "from",
+        "to",
+      ],
+      "type": "object",
+    },
+    "name": "date_diff",
+  },
+  {
+    "description": "Renders a square PNG of a solid colour. Accepts #rgb, #rrggbb or a name: black, white, red, green, blue, yellow, orange, purple, pink, gray.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "description": "The colour to render.",
+          "type": "string",
+        },
+        "size": {
+          "description": "Side length in pixels. Defaults to 16.",
+          "maximum": 64,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "required": [
+        "color",
+      ],
+      "type": "object",
+    },
+    "name": "color_swatch",
+  },
+  {
+    "description": "Gets the current weather for a city. Fake but stable: the same city always reports the same weather. "Atlantis" is never found.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "city": {
+          "description": "The city name.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "units": {
+          "description": "metric (°C, km/h) or imperial (°F, mph). Defaults to metric.",
+          "enum": [
+            "metric",
+            "imperial",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "city",
+      ],
+      "type": "object",
+    },
+    "name": "get_weather",
+  },
+  {
+    "description": "Gets a daily forecast for the next 1 to 7 days. Days are numbered from 1 (tomorrow). "Atlantis" is never found.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "city": {
+          "description": "The city name.",
+          "minLength": 1,
+          "type": "string",
+        },
+        "days": {
+          "description": "How many days to forecast.",
+          "maximum": 7,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "units": {
+          "description": "metric (°C, km/h) or imperial (°F, mph). Defaults to metric.",
+          "enum": [
+            "metric",
+            "imperial",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "city",
+        "days",
+      ],
+      "type": "object",
+    },
+    "name": "get_forecast",
+  },
+  {
+    "description": "Searches the web. Results are fake but stable, all under example.com. The query "error" makes the search backend fail.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "description": "Maximum number of results. Defaults to 5.",
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer",
+        },
+        "query": {
+          "description": "What to search for.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "query",
+      ],
+      "type": "object",
+    },
+    "name": "search_web",
+  },
+  {
+    "description": "Gets the latest price of a stock by ticker symbol (1 to 5 letters). Fake but stable. "XXXX" is an unknown symbol.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "symbol": {
+          "description": "The ticker symbol.",
+          "pattern": "^\\s*[A-Za-z]{1,5}\\s*$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "symbol",
+      ],
+      "type": "object",
+    },
+    "name": "get_stock_price",
+  },
+  {
+    "description": "Converts an amount between currencies by ISO 4217 code. Rates are fake but consistent across pairs. "XXX" (ISO's "no currency") is not supported.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "description": "The amount to convert.",
+          "type": "number",
+        },
+        "from": {
+          "description": "The currency of the amount.",
+          "pattern": "^\\s*[A-Za-z]{3}\\s*$",
+          "type": "string",
+        },
+        "to": {
+          "description": "The currency to convert to.",
+          "pattern": "^\\s*[A-Za-z]{3}\\s*$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "amount",
+        "from",
+        "to",
+      ],
+      "type": "object",
+    },
+    "name": "convert_currency",
+  },
+  {
+    "description": "Gets a user profile by ID. Fake but stable: the same ID is always the same person. "missing" is never found.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "description": "The user ID.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "user_id",
+      ],
+      "type": "object",
+    },
+    "name": "get_user",
+  },
+  {
+    "description": "Finds the coordinates of an address. Fake but stable. "Atlantis" is never found.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "description": "The address to locate.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "address",
+      ],
+      "type": "object",
+    },
+    "name": "geocode",
+  },
+  {
+    "description": "Gets the status of a flight by number, e.g. IB3456. Fake but stable. "XX000" is never found.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "flight_number": {
+          "description": "Airline code followed by 1 to 4 digits.",
+          "pattern": "^\\s*[A-Za-z0-9]{2}\\d{1,4}\\s*$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "flight_number",
+      ],
+      "type": "object",
+    },
+    "name": "get_flight_status",
+  },
+  {
+    "description": "Reads a text file from a fake file system. Contents are stable and follow the extension (.json, .md, .csv, anything else as plain text). Paths with ".." are refused, and "/missing" does not exist.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Absolute path of the file.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+      ],
+      "type": "object",
+    },
+    "name": "read_file",
+  },
+  {
+    "description": "Deletes a file from the fake file system after asking the user to confirm (on protocol revisions that can ask). Nothing is really deleted. Paths with ".." are refused, and "/missing" does not exist.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Absolute path of the file.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+      ],
+      "type": "object",
+    },
+    "name": "delete_file",
+  },
+  {
+    "description": "Sends an email. Nothing is really sent: it returns a stable message ID. Mail to "bounce@example.com" bounces.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "description": "The message body.",
+          "type": "string",
+        },
+        "subject": {
+          "description": "The subject line.",
+          "type": "string",
+        },
+        "to": {
+          "description": "The recipient address.",
+          "pattern": "^\\s*[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\s*$",
+          "type": "string",
+        },
+      },
+      "required": [
+        "to",
+        "subject",
+        "body",
+      ],
+      "type": "object",
+    },
+    "name": "send_email",
+  },
+]
+`;
+
+exports[`catalog over 2024-11-05 calls echo 1`] = `
+{
+  "content": [
+    {
+      "text": "Echo: Hello!",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls add 1`] = `
+{
+  "content": [
+    {
+      "text": "{"sum":5.5}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls calculate 1`] = `
+{
+  "content": [
+    {
+      "text": "{"result":12}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls transform_text 1`] = `
+{
+  "content": [
+    {
+      "text": "{"result":"hola-mundo"}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls text_stats 1`] = `
+{
+  "content": [
+    {
+      "text": "{"words":3,"chars":13,"lines":2}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls sort_list 1`] = `
+{
+  "content": [
+    {
+      "text": "{"items":["Apple","fig","pear"]}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls convert_units 1`] = `
+{
+  "content": [
+    {
+      "text": "{"value":212,"unit":"f"}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls hash_text 1`] = `
+{
+  "content": [
+    {
+      "text": "{"algorithm":"sha256","hex":"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls date_diff 1`] = `
+{
+  "content": [
+    {
+      "text": "{"days":60,"hours":1440,"seconds":5184000}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls color_swatch 1`] = `
+{
+  "content": [
+    {
+      "data": "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAGUlEQVR4AQEOAPH/AP+IAP+IAAD/iAD/iAAuzgYd3WBI5wAAAABJRU5ErkJggg==",
+      "mimeType": "image/png",
+      "type": "image",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls get_weather 1`] = `
+{
+  "content": [
+    {
+      "text": "{"city":"Madrid","temperature":14,"temperature_unit":"°C","conditions":"thunderstorm","humidity":42,"wind_speed":55,"wind_speed_unit":"km/h"}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls get_forecast 1`] = `
+{
+  "content": [
+    {
+      "text": "{"city":"Oslo","temperature_unit":"°C","days":[{"day":1,"high":14,"low":8,"conditions":"thunderstorm","precipitation_chance":49},{"day":2,"high":-7,"low":-17,"conditions":"snow","precipitation_chance":13},{"day":3,"high":1,"low":-3,"conditions":"fog","precipitation_chance":79}]}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls search_web 1`] = `
+{
+  "content": [
+    {
+      "text": "{"query":"model context protocol","results":[{"title":"Model Context Protocol: Analysis","url":"https://example.com/model-context-protocol/1-analysis","snippet":"A analysis about model context protocol, with 4 sections and 28 examples."},{"title":"Model Context Protocol: Analysis","url":"https://example.com/model-context-protocol/2-analysis","snippet":"A analysis about model context protocol, with 10 sections and 11 examples."}]}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls get_stock_price 1`] = `
+{
+  "content": [
+    {
+      "text": "{"symbol":"ACME","price":74.44,"currency":"USD","change":1.99,"change_percent":2.67}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls convert_currency 1`] = `
+{
+  "content": [
+    {
+      "text": "{"amount":100,"from":"EUR","to":"JPY","rate":1.444502,"result":144.45}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls get_user 1`] = `
+{
+  "content": [
+    {
+      "text": "{"id":"u_42","name":"Frances Perlman","email":"frances.perlman@example.com","role":"editor","created_at":"2024-12-07"}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls geocode 1`] = `
+{
+  "content": [
+    {
+      "text": "{"formatted_address":"1 Infinite Loop","latitude":26.099009,"longitude":55.265061}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls get_flight_status 1`] = `
+{
+  "content": [
+    {
+      "text": "{"flight_number":"IB3456","status":"on_time","departure_airport":"CDG","arrival_airport":"AMS","scheduled_departure":"05:05","terminal":"4","gate":"A10"}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls read_file 1`] = `
+{
+  "content": [
+    {
+      "resource": {
+        "mimeType": "application/json",
+        "text": 
+"{
+  "name": "config.json",
+  "version": "1.18.20",
+  "enabled": true,
+  "items": 79
+}
+"
+,
+        "uri": "file:///etc/app/config.json",
+      },
+      "type": "resource",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls delete_file 1`] = `
+{
+  "content": [
+    {
+      "text": "{"path":"/tmp/old.log","deleted":true}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls send_email 1`] = `
+{
+  "content": [
+    {
+      "text": "{"message_id":"msg_d646c881ffcb2fbddf792137","to":"ada@example.com","status":"sent"}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
 exports[`catalog over 2026-07-28 lists the whole catalog 1`] = `
 [
   {
@@ -1014,6 +1786,46 @@ exports[`catalog over 2026-07-28 lists the whole catalog 1`] = `
     },
     "name": "read_file",
     "title": "Read file",
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false,
+    },
+    "description": "Deletes a file from the fake file system after asking the user to confirm (on protocol revisions that can ask). Nothing is really deleted. Paths with ".." are refused, and "/missing" does not exist.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Absolute path of the file.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+      ],
+      "type": "object",
+    },
+    "name": "delete_file",
+    "outputSchema": {
+      "properties": {
+        "deleted": {
+          "type": "boolean",
+        },
+        "path": {
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+        "deleted",
+      ],
+      "type": "object",
+    },
+    "title": "Delete file",
   },
   {
     "annotations": {
@@ -2484,6 +3296,46 @@ exports[`catalog over 2025-11-25 lists the whole catalog 1`] = `
   },
   {
     "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false,
+    },
+    "description": "Deletes a file from the fake file system after asking the user to confirm (on protocol revisions that can ask). Nothing is really deleted. Paths with ".." are refused, and "/missing" does not exist.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Absolute path of the file.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+      ],
+      "type": "object",
+    },
+    "name": "delete_file",
+    "outputSchema": {
+      "properties": {
+        "deleted": {
+          "type": "boolean",
+        },
+        "path": {
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+        "deleted",
+      ],
+      "type": "object",
+    },
+    "title": "Delete file",
+  },
+  {
+    "annotations": {
       "destructiveHint": false,
       "idempotentHint": false,
       "openWorldHint": true,
@@ -2895,6 +3747,21 @@ exports[`catalog over 2025-11-25 calls read_file 1`] = `
       "type": "resource",
     },
   ],
+}
+`;
+
+exports[`catalog over 2025-11-25 calls delete_file 1`] = `
+{
+  "content": [
+    {
+      "text": "{"path":"/tmp/old.log","deleted":true}",
+      "type": "text",
+    },
+  ],
+  "structuredContent": {
+    "deleted": true,
+    "path": "/tmp/old.log",
+  },
 }
 `;
 
@@ -3931,6 +4798,46 @@ exports[`catalog over 2025-06-18 lists the whole catalog 1`] = `
   },
   {
     "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false,
+    },
+    "description": "Deletes a file from the fake file system after asking the user to confirm (on protocol revisions that can ask). Nothing is really deleted. Paths with ".." are refused, and "/missing" does not exist.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Absolute path of the file.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+      ],
+      "type": "object",
+    },
+    "name": "delete_file",
+    "outputSchema": {
+      "properties": {
+        "deleted": {
+          "type": "boolean",
+        },
+        "path": {
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+        "deleted",
+      ],
+      "type": "object",
+    },
+    "title": "Delete file",
+  },
+  {
+    "annotations": {
       "destructiveHint": false,
       "idempotentHint": false,
       "openWorldHint": true,
@@ -4342,6 +5249,21 @@ exports[`catalog over 2025-06-18 calls read_file 1`] = `
       "type": "resource",
     },
   ],
+}
+`;
+
+exports[`catalog over 2025-06-18 calls delete_file 1`] = `
+{
+  "content": [
+    {
+      "text": "{"path":"/tmp/old.log","deleted":true}",
+      "type": "text",
+    },
+  ],
+  "structuredContent": {
+    "deleted": true,
+    "path": "/tmp/old.log",
+  },
 }
 `;
 
@@ -4975,6 +5897,31 @@ exports[`catalog over 2025-03-26 lists the whole catalog 1`] = `
   },
   {
     "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false,
+      "title": "Delete file",
+    },
+    "description": "Deletes a file from the fake file system after asking the user to confirm (on protocol revisions that can ask). Nothing is really deleted. Paths with ".." are refused, and "/missing" does not exist.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Absolute path of the file.",
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": [
+        "path",
+      ],
+      "type": "object",
+    },
+    "name": "delete_file",
+  },
+  {
+    "annotations": {
       "destructiveHint": false,
       "idempotentHint": false,
       "openWorldHint": true,
@@ -5233,750 +6180,18 @@ exports[`catalog over 2025-03-26 calls read_file 1`] = `
 }
 `;
 
+exports[`catalog over 2025-03-26 calls delete_file 1`] = `
+{
+  "content": [
+    {
+      "text": "{"path":"/tmp/old.log","deleted":true}",
+      "type": "text",
+    },
+  ],
+}
+`;
+
 exports[`catalog over 2025-03-26 calls send_email 1`] = `
-{
-  "content": [
-    {
-      "text": "{"message_id":"msg_d646c881ffcb2fbddf792137","to":"ada@example.com","status":"sent"}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 lists the whole catalog 1`] = `
-[
-  {
-    "description": "Returns the given text prefixed with "Echo: ".",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "text": {
-          "description": "The text to echo back.",
-          "type": "string",
-        },
-      },
-      "required": [
-        "text",
-      ],
-      "type": "object",
-    },
-    "name": "echo",
-  },
-  {
-    "description": "Adds two numbers.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "a": {
-          "description": "The first addend.",
-          "type": "number",
-        },
-        "b": {
-          "description": "The second addend.",
-          "type": "number",
-        },
-      },
-      "required": [
-        "a",
-        "b",
-      ],
-      "type": "object",
-    },
-    "name": "add",
-  },
-  {
-    "description": "Evaluates an arithmetic expression with + - * / % ^ and parentheses, e.g. '(2 + 3) * 4'.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "expression": {
-          "description": "The expression to evaluate.",
-          "maxLength": 1000,
-          "minLength": 1,
-          "type": "string",
-        },
-      },
-      "required": [
-        "expression",
-      ],
-      "type": "object",
-    },
-    "name": "calculate",
-  },
-  {
-    "description": "Converts text to upper case, lower case, reversed, or a URL slug.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "operation": {
-          "description": "The transformation to apply.",
-          "enum": [
-            "upper",
-            "lower",
-            "reverse",
-            "slug",
-          ],
-          "type": "string",
-        },
-        "text": {
-          "description": "The text to transform.",
-          "type": "string",
-        },
-      },
-      "required": [
-        "text",
-        "operation",
-      ],
-      "type": "object",
-    },
-    "name": "transform_text",
-  },
-  {
-    "description": "Counts the words, characters and lines of a text.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "text": {
-          "description": "The text to measure.",
-          "type": "string",
-        },
-      },
-      "required": [
-        "text",
-      ],
-      "type": "object",
-    },
-    "name": "text_stats",
-  },
-  {
-    "description": "Sorts a list of strings by code point, ascending unless told otherwise.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "items": {
-          "description": "The strings to sort.",
-          "items": {
-            "type": "string",
-          },
-          "maxItems": 1000,
-          "type": "array",
-        },
-        "order": {
-          "description": "Sort order. Defaults to asc.",
-          "enum": [
-            "asc",
-            "desc",
-          ],
-          "type": "string",
-        },
-      },
-      "required": [
-        "items",
-      ],
-      "type": "object",
-    },
-    "name": "sort_list",
-  },
-  {
-    "description": "Converts a value between units of length, mass, time or temperature (c, f and k are Celsius, Fahrenheit and Kelvin).",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "from": {
-          "description": "The unit of the value.",
-          "enum": [
-            "mm",
-            "cm",
-            "m",
-            "km",
-            "in",
-            "ft",
-            "yd",
-            "mi",
-            "mg",
-            "g",
-            "kg",
-            "oz",
-            "lb",
-            "s",
-            "min",
-            "h",
-            "d",
-            "c",
-            "f",
-            "k",
-          ],
-          "type": "string",
-        },
-        "to": {
-          "description": "The unit to convert to.",
-          "enum": [
-            "mm",
-            "cm",
-            "m",
-            "km",
-            "in",
-            "ft",
-            "yd",
-            "mi",
-            "mg",
-            "g",
-            "kg",
-            "oz",
-            "lb",
-            "s",
-            "min",
-            "h",
-            "d",
-            "c",
-            "f",
-            "k",
-          ],
-          "type": "string",
-        },
-        "value": {
-          "description": "The value to convert.",
-          "type": "number",
-        },
-      },
-      "required": [
-        "value",
-        "from",
-        "to",
-      ],
-      "type": "object",
-    },
-    "name": "convert_units",
-  },
-  {
-    "description": "Computes the hex digest of a UTF-8 text with MD5, SHA-1 or SHA-256.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "algorithm": {
-          "description": "The hash algorithm.",
-          "enum": [
-            "md5",
-            "sha1",
-            "sha256",
-          ],
-          "type": "string",
-        },
-        "text": {
-          "description": "The text to hash.",
-          "type": "string",
-        },
-      },
-      "required": [
-        "text",
-        "algorithm",
-      ],
-      "type": "object",
-    },
-    "name": "hash_text",
-  },
-  {
-    "description": "Computes the time from one ISO 8601 date to another. Dates are YYYY-MM-DD (UTC) or date-times with an offset, e.g. 2024-05-01T10:00:00Z.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "from": {
-          "description": "The start date.",
-          "type": "string",
-        },
-        "to": {
-          "description": "The end date.",
-          "type": "string",
-        },
-      },
-      "required": [
-        "from",
-        "to",
-      ],
-      "type": "object",
-    },
-    "name": "date_diff",
-  },
-  {
-    "description": "Renders a square PNG of a solid colour. Accepts #rgb, #rrggbb or a name: black, white, red, green, blue, yellow, orange, purple, pink, gray.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "color": {
-          "description": "The colour to render.",
-          "type": "string",
-        },
-        "size": {
-          "description": "Side length in pixels. Defaults to 16.",
-          "maximum": 64,
-          "minimum": 1,
-          "type": "integer",
-        },
-      },
-      "required": [
-        "color",
-      ],
-      "type": "object",
-    },
-    "name": "color_swatch",
-  },
-  {
-    "description": "Gets the current weather for a city. Fake but stable: the same city always reports the same weather. "Atlantis" is never found.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "city": {
-          "description": "The city name.",
-          "minLength": 1,
-          "type": "string",
-        },
-        "units": {
-          "description": "metric (°C, km/h) or imperial (°F, mph). Defaults to metric.",
-          "enum": [
-            "metric",
-            "imperial",
-          ],
-          "type": "string",
-        },
-      },
-      "required": [
-        "city",
-      ],
-      "type": "object",
-    },
-    "name": "get_weather",
-  },
-  {
-    "description": "Gets a daily forecast for the next 1 to 7 days. Days are numbered from 1 (tomorrow). "Atlantis" is never found.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "city": {
-          "description": "The city name.",
-          "minLength": 1,
-          "type": "string",
-        },
-        "days": {
-          "description": "How many days to forecast.",
-          "maximum": 7,
-          "minimum": 1,
-          "type": "integer",
-        },
-        "units": {
-          "description": "metric (°C, km/h) or imperial (°F, mph). Defaults to metric.",
-          "enum": [
-            "metric",
-            "imperial",
-          ],
-          "type": "string",
-        },
-      },
-      "required": [
-        "city",
-        "days",
-      ],
-      "type": "object",
-    },
-    "name": "get_forecast",
-  },
-  {
-    "description": "Searches the web. Results are fake but stable, all under example.com. The query "error" makes the search backend fail.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "limit": {
-          "description": "Maximum number of results. Defaults to 5.",
-          "maximum": 10,
-          "minimum": 1,
-          "type": "integer",
-        },
-        "query": {
-          "description": "What to search for.",
-          "minLength": 1,
-          "type": "string",
-        },
-      },
-      "required": [
-        "query",
-      ],
-      "type": "object",
-    },
-    "name": "search_web",
-  },
-  {
-    "description": "Gets the latest price of a stock by ticker symbol (1 to 5 letters). Fake but stable. "XXXX" is an unknown symbol.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "symbol": {
-          "description": "The ticker symbol.",
-          "pattern": "^\\s*[A-Za-z]{1,5}\\s*$",
-          "type": "string",
-        },
-      },
-      "required": [
-        "symbol",
-      ],
-      "type": "object",
-    },
-    "name": "get_stock_price",
-  },
-  {
-    "description": "Converts an amount between currencies by ISO 4217 code. Rates are fake but consistent across pairs. "XXX" (ISO's "no currency") is not supported.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "amount": {
-          "description": "The amount to convert.",
-          "type": "number",
-        },
-        "from": {
-          "description": "The currency of the amount.",
-          "pattern": "^\\s*[A-Za-z]{3}\\s*$",
-          "type": "string",
-        },
-        "to": {
-          "description": "The currency to convert to.",
-          "pattern": "^\\s*[A-Za-z]{3}\\s*$",
-          "type": "string",
-        },
-      },
-      "required": [
-        "amount",
-        "from",
-        "to",
-      ],
-      "type": "object",
-    },
-    "name": "convert_currency",
-  },
-  {
-    "description": "Gets a user profile by ID. Fake but stable: the same ID is always the same person. "missing" is never found.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "user_id": {
-          "description": "The user ID.",
-          "minLength": 1,
-          "type": "string",
-        },
-      },
-      "required": [
-        "user_id",
-      ],
-      "type": "object",
-    },
-    "name": "get_user",
-  },
-  {
-    "description": "Finds the coordinates of an address. Fake but stable. "Atlantis" is never found.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "address": {
-          "description": "The address to locate.",
-          "minLength": 1,
-          "type": "string",
-        },
-      },
-      "required": [
-        "address",
-      ],
-      "type": "object",
-    },
-    "name": "geocode",
-  },
-  {
-    "description": "Gets the status of a flight by number, e.g. IB3456. Fake but stable. "XX000" is never found.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "flight_number": {
-          "description": "Airline code followed by 1 to 4 digits.",
-          "pattern": "^\\s*[A-Za-z0-9]{2}\\d{1,4}\\s*$",
-          "type": "string",
-        },
-      },
-      "required": [
-        "flight_number",
-      ],
-      "type": "object",
-    },
-    "name": "get_flight_status",
-  },
-  {
-    "description": "Reads a text file from a fake file system. Contents are stable and follow the extension (.json, .md, .csv, anything else as plain text). Paths with ".." are refused, and "/missing" does not exist.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "path": {
-          "description": "Absolute path of the file.",
-          "minLength": 1,
-          "type": "string",
-        },
-      },
-      "required": [
-        "path",
-      ],
-      "type": "object",
-    },
-    "name": "read_file",
-  },
-  {
-    "description": "Sends an email. Nothing is really sent: it returns a stable message ID. Mail to "bounce@example.com" bounces.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "body": {
-          "description": "The message body.",
-          "type": "string",
-        },
-        "subject": {
-          "description": "The subject line.",
-          "type": "string",
-        },
-        "to": {
-          "description": "The recipient address.",
-          "pattern": "^\\s*[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\s*$",
-          "type": "string",
-        },
-      },
-      "required": [
-        "to",
-        "subject",
-        "body",
-      ],
-      "type": "object",
-    },
-    "name": "send_email",
-  },
-]
-`;
-
-exports[`catalog over 2024-11-05 calls echo 1`] = `
-{
-  "content": [
-    {
-      "text": "Echo: Hello!",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls add 1`] = `
-{
-  "content": [
-    {
-      "text": "{"sum":5.5}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls calculate 1`] = `
-{
-  "content": [
-    {
-      "text": "{"result":12}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls transform_text 1`] = `
-{
-  "content": [
-    {
-      "text": "{"result":"hola-mundo"}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls text_stats 1`] = `
-{
-  "content": [
-    {
-      "text": "{"words":3,"chars":13,"lines":2}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls sort_list 1`] = `
-{
-  "content": [
-    {
-      "text": "{"items":["Apple","fig","pear"]}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls convert_units 1`] = `
-{
-  "content": [
-    {
-      "text": "{"value":212,"unit":"f"}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls hash_text 1`] = `
-{
-  "content": [
-    {
-      "text": "{"algorithm":"sha256","hex":"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls date_diff 1`] = `
-{
-  "content": [
-    {
-      "text": "{"days":60,"hours":1440,"seconds":5184000}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls color_swatch 1`] = `
-{
-  "content": [
-    {
-      "data": "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAGUlEQVR4AQEOAPH/AP+IAP+IAAD/iAD/iAAuzgYd3WBI5wAAAABJRU5ErkJggg==",
-      "mimeType": "image/png",
-      "type": "image",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls get_weather 1`] = `
-{
-  "content": [
-    {
-      "text": "{"city":"Madrid","temperature":14,"temperature_unit":"°C","conditions":"thunderstorm","humidity":42,"wind_speed":55,"wind_speed_unit":"km/h"}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls get_forecast 1`] = `
-{
-  "content": [
-    {
-      "text": "{"city":"Oslo","temperature_unit":"°C","days":[{"day":1,"high":14,"low":8,"conditions":"thunderstorm","precipitation_chance":49},{"day":2,"high":-7,"low":-17,"conditions":"snow","precipitation_chance":13},{"day":3,"high":1,"low":-3,"conditions":"fog","precipitation_chance":79}]}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls search_web 1`] = `
-{
-  "content": [
-    {
-      "text": "{"query":"model context protocol","results":[{"title":"Model Context Protocol: Analysis","url":"https://example.com/model-context-protocol/1-analysis","snippet":"A analysis about model context protocol, with 4 sections and 28 examples."},{"title":"Model Context Protocol: Analysis","url":"https://example.com/model-context-protocol/2-analysis","snippet":"A analysis about model context protocol, with 10 sections and 11 examples."}]}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls get_stock_price 1`] = `
-{
-  "content": [
-    {
-      "text": "{"symbol":"ACME","price":74.44,"currency":"USD","change":1.99,"change_percent":2.67}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls convert_currency 1`] = `
-{
-  "content": [
-    {
-      "text": "{"amount":100,"from":"EUR","to":"JPY","rate":1.444502,"result":144.45}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls get_user 1`] = `
-{
-  "content": [
-    {
-      "text": "{"id":"u_42","name":"Frances Perlman","email":"frances.perlman@example.com","role":"editor","created_at":"2024-12-07"}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls geocode 1`] = `
-{
-  "content": [
-    {
-      "text": "{"formatted_address":"1 Infinite Loop","latitude":26.099009,"longitude":55.265061}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls get_flight_status 1`] = `
-{
-  "content": [
-    {
-      "text": "{"flight_number":"IB3456","status":"on_time","departure_airport":"CDG","arrival_airport":"AMS","scheduled_departure":"05:05","terminal":"4","gate":"A10"}",
-      "type": "text",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls read_file 1`] = `
-{
-  "content": [
-    {
-      "resource": {
-        "mimeType": "application/json",
-        "text": 
-"{
-  "name": "config.json",
-  "version": "1.18.20",
-  "enabled": true,
-  "items": 79
-}
-"
-,
-        "uri": "file:///etc/app/config.json",
-      },
-      "type": "resource",
-    },
-  ],
-}
-`;
-
-exports[`catalog over 2024-11-05 calls send_email 1`] = `
 {
   "content": [
     {
