@@ -46,9 +46,9 @@ export const simulateWork: Tool = {
     },
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
-  run: async ({ steps, step_ms }, { report, signal }) => {
+  run: async ({ steps, step_ms }, { report, signal, instant }) => {
     const total = (steps as number | undefined) ?? 5;
-    const ms = (step_ms as number | undefined) ?? 100;
+    const ms = instant ? 0 : ((step_ms as number | undefined) ?? 100);
     for (let step = 1; step <= total; step++) {
       await sleep(ms, signal);
       // Nobody receives this: a cancelled request gets no response.

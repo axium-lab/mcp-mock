@@ -8,12 +8,16 @@ export interface StandardHeaders {
   name?: string;
 }
 
-// Methods whose Mcp-Name header mirrors a body field. Only those the mock
-// serves are listed; tasks/* (the tasks extension) is not supported.
+// Methods whose Mcp-Name header mirrors a body field: the core ones, and the
+// tasks extension's, whose binding asks for the task id so intermediaries can
+// route every request for a task to the same place.
 const NAME_SOURCE: Readonly<Record<string, string>> = {
   "tools/call": "name",
   "prompts/get": "name",
   "resources/read": "uri",
+  "tasks/get": "taskId",
+  "tasks/update": "taskId",
+  "tasks/cancel": "taskId",
 };
 
 export function nameSource(

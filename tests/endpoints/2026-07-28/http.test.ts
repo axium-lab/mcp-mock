@@ -75,6 +75,7 @@ describe("2026-07-28 over raw HTTP", () => {
           tools: { listChanged: true },
           resources: { listChanged: true, subscribe: true },
           prompts: { listChanged: true },
+          extensions: { "io.modelcontextprotocol/tasks": {} },
         },
         ttlMs: 3_600_000,
         cacheScope: "public",

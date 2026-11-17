@@ -62,6 +62,9 @@ export interface CallContext {
   report?: (progress: Progress) => void;
   // Aborted when the request is cancelled.
   signal?: AbortSignal;
+  // Set when a finished task replays its call to produce the result: the
+  // time it took has already passed, so slow tools must not wait again.
+  instant?: boolean;
 }
 
 // MissingRequiredClientCapability, the 2026-07-28 error for a request that

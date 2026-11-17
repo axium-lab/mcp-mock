@@ -41,6 +41,21 @@ for (const { id } of REVISIONS) {
   });
 }
 
+// The tasks extension's own schema (schemas/extensions/tasks), draft 2020-12.
+const tasksAjv = new Ajv2020({ strict: false });
+addFormats(tasksAjv);
+tasksAjv.addSchema(JSON.parse(readFileSync("schemas/extensions/tasks/schema.json", "utf-8")) as AnySchema, "tasks");
+
+export function validateTasksExtension(definition: string, value: unknown): SchemaResult {
+  const validate = tasksAjv.getSchema(`tasks#/$defs/${definition}`);
+  if (!validate) throw new Error(`the tasks extension schema has no definition named ${definition}`);
+  const valid = validate(value) as boolean;
+  return {
+    valid,
+    errors: (validate.errors ?? []).map((error) => `${error.instancePath || "/"} ${error.message}`),
+  };
+}
+
 export interface SchemaResult {
   valid: boolean;
   // Ajv's messages, prefixed with the failing path, for readable assertions.

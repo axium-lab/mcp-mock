@@ -148,6 +148,7 @@ describe("change notifications", () => {
         tools: { listChanged: true },
         resources: { listChanged: true, subscribe: true },
         prompts: { listChanged: true },
+        extensions: { "io.modelcontextprotocol/tasks": {} },
       });
     });
   });

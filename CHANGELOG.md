@@ -58,6 +58,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - `subscriptions/listen` on 2026-07-28 opens a long-lived SSE stream. It is acknowledged first with the honored filter (resource subscriptions only for resources that exist) and every message carries the subscription id. Without a script it stays open and quiet, with keep-alive comments; with one it delivers the scripted `list_changed` and `resources/updated` notifications and, if asked, ends gracefully with the listen response. A script that announces something not subscribed is refused, since the server must not send what was not asked for. `server/discover` now advertises `listChanged` and `subscribe`.
   - `resources/subscribe` and `resources/unsubscribe` on the 2024-11-05 SSE transport, whose session stream can carry `resources/updated`; its `initialize` advertises `subscribe`. The legacy Streamable HTTP revisions, without sessions or a GET stream, have nowhere to deliver them and do not offer them.
 
+- The tasks extension (`io.modelcontextprotocol/tasks`) on 2026-07-28, kept stateless: the task id carries the original call, its start and its duration, so any `tasks/get` can work out the task's state without anything stored.
+  - `server/discover` advertises the extension. For clients that declare it, `simulate_work` answers with a task (`resultType: "task"`) instead of blocking, and `_meta["com.mcp-mock/task"]` (`durationMs`) makes a task of any `tools/call`. A forced task for a client without the extension is `-32021`.
+  - `tasks/get` reports `working`, then `completed` with the result the call would have returned, or `failed` with its JSON-RPC error. A tool execution error completes the task, as the extension requires. `tasks/update` and `tasks/cancel` acknowledge; cancellation is cooperative, and a stateless task still finishes, which the extension allows. Unknown tasks are `-32602`, clients without the extension get `-32021`, and `Mcp-Name` must carry the task id.
+  - `subscriptions/listen` accepts `taskIds` and sends `notifications/tasks` when each task finishes.
+  - The extension's official schema is vendored under `schemas/extensions/tasks/` and every task message is validated against it. Task timestamps are real, the one exception to the mock's determinism; task results are not affected.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

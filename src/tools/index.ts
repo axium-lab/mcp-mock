@@ -75,6 +75,7 @@ export interface CallOptions {
   // Progress reporting and cancellation, when the transport can carry them.
   report?: CallContext["report"];
   signal?: CallContext["signal"];
+  instant?: boolean;
 }
 
 // tools/call. Protocol errors (thrown) for a request the model cannot fix:
@@ -136,6 +137,7 @@ export function callTool(
     ...(options.mrtr && { mrtr: options.mrtr }),
     ...(options.report && { report: options.report }),
     ...(options.signal && { signal: options.signal }),
+    ...(options.instant && { instant: true }),
   });
 }
 

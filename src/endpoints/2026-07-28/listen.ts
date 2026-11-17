@@ -4,6 +4,9 @@ import { ErrorCode, type JsonRpcRequest, JsonRpcError } from "../../core/jsonrpc
 import { SERVER_INFO } from "../../core/server-info.ts";
 import { readResource } from "../../resources/index.ts";
 import { META } from "./envelope.ts";
+import { clientCapabilitiesOf, detailedTask } from "./tasks.ts";
+import { decodeTask, declaresTasks, MISSING_TASKS_CAPABILITY } from "../../tasks/index.ts";
+import { MISSING_REQUIRED_CLIENT_CAPABILITY } from "../../tools/types.ts";
 
 // subscriptions/listen: a long-lived request whose response is an SSE stream
 // of change notifications, replacing the GET stream and resources/subscribe
@@ -23,6 +26,8 @@ interface Filter {
   promptsListChanged?: boolean;
   resourcesListChanged?: boolean;
   resourceSubscriptions?: string[];
+  // Tasks extension: notifications/tasks for these tasks.
+  taskIds?: string[];
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -40,7 +45,7 @@ function exists(uri: string): boolean {
 
 // What the server agrees to honor, which the acknowledgment reports: every
 // list it has, and the subscribed resources that exist.
-function honored(filter: Record<string, unknown>): Filter {
+function honored(filter: Record<string, unknown>, params: Record<string, unknown> | undefined): Filter {
   const result: Filter = {};
   for (const key of ["toolsListChanged", "promptsListChanged", "resourcesListChanged"] as const) {
     if (filter[key] === true) result[key] = true;
@@ -48,6 +53,25 @@ function honored(filter: Record<string, unknown>): Filter {
   if (Array.isArray(filter.resourceSubscriptions)) {
     const uris = filter.resourceSubscriptions.filter((uri): uri is string => typeof uri === "string" && exists(uri));
     if (uris.length > 0) result.resourceSubscriptions = uris;
+  }
+  if (Array.isArray(filter.taskIds) && filter.taskIds.length > 0) {
+    // Task notifications are for clients that declared the extension.
+    if (!declaresTasks(clientCapabilitiesOf(params))) {
+      throw new JsonRpcError(
+        MISSING_REQUIRED_CLIENT_CAPABILITY,
+        "Missing required client capability: the tasks extension",
+        MISSING_TASKS_CAPABILITY,
+      );
+    }
+    const ids = filter.taskIds.filter((taskId): taskId is string => {
+      try {
+        decodeTask(taskId);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    if (ids.length > 0) result.taskIds = ids;
   }
   return result;
 }
@@ -91,12 +115,13 @@ export function serveListen(message: JsonRpcRequest, res: Response): void {
     if (!isObject(params?.notifications)) {
       throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "notifications" must be an object');
     }
-    filter = honored(params.notifications);
+    filter = honored(params.notifications, params);
     script = notificationScript(params);
     if (script) checkScript(script.events, filter);
   } catch (error) {
     if (!(error instanceof JsonRpcError)) throw error;
-    res.status(200).json({ jsonrpc: "2.0", id, error: error.toObject() });
+    const status = error.code === MISSING_REQUIRED_CLIENT_CAPABILITY ? 400 : 200;
+    res.status(status).json({ jsonrpc: "2.0", id, error: error.toObject() });
     return;
   }
 
@@ -122,6 +147,21 @@ export function serveListen(message: JsonRpcRequest, res: Response): void {
     method: "notifications/subscriptions/acknowledged",
     params: { _meta: meta, notifications: filter },
   });
+
+  // Each subscribed task is reported once, when it finishes.
+  for (const taskId of filter.taskIds ?? []) {
+    const { startedAt, durationMs } = decodeTask(taskId);
+    timers.push(
+      setTimeout(
+        () => {
+          detailedTask(taskId, Date.now())
+            .then((task) => send({ jsonrpc: "2.0", method: "notifications/tasks", params: { _meta: meta, ...task } }))
+            .catch(() => {});
+        },
+        Math.max(0, startedAt + durationMs - Date.now()),
+      ),
+    );
+  }
 
   if (!script) return;
   const { events, intervalMs, close } = script;

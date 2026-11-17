@@ -17,6 +17,7 @@ export const CONTROL = {
   error: "com.mcp-mock/error",
   inputRequired: "com.mcp-mock/input-required",
   notifications: "com.mcp-mock/notifications",
+  task: "com.mcp-mock/task",
   statusHeader: "x-mcp-mock-status",
 } as const;
 

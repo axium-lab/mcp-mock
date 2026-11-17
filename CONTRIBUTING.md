@@ -20,6 +20,9 @@ src/
   core/        transport- and revision-agnostic mechanisms (JSON-RPC, revisions, HTTP fallbacks)
   tools/       the tool catalog, independent of any revision: calc/ (real computations),
                world/ (deterministic fake data), the hash engine and the argument validator
+  resources/   the resource catalog, reading from the same fake world as the tools
+  prompts/     the prompt catalog
+  tasks/       the tasks extension's stateless task ids
   endpoints/   one self-contained router per pinned revision, plus the dual-era /mcp
   app.ts       builds the Express app without listening, for tests
   index.ts     entry point
@@ -33,7 +36,7 @@ tests/         integration tests with the official SDK as the client
 - **Each endpoint is self-contained.** It owns its paths, transport and revision quirks. Adding an endpoint never touches another one.
 - **Reuse, don't copy.** When a revision did not change something, its endpoint imports the newer revision's code for it. Shared code moves to a common module only when two endpoints share the exact same wire behavior, never with a single consumer.
 - **Only routers know about HTTP.** Protocol logic (handlers, payload builders) never imports Express, so it can serve stdio later.
-- **Deterministic.** No `Math.random()`, no `Date.now()` in responses. The same request returns the same bytes.
+- **Deterministic.** No `Math.random()`, no `Date.now()` in responses. The same request returns the same bytes. The one exception is the tasks extension (`src/tasks/`): a task's status depends on the time passed since it started, and its timestamps are real. Its result, once completed, is as deterministic as the call.
 - **Stateless tools.** A tool's result depends only on its arguments.
 - **One exception to statelessness.** The 2024-11-05 HTTP+SSE transport (`src/endpoints/2024-11-05/`) cannot work without pairing each POST with its open stream, so it keeps open streams in memory by session id, and forgets them when the connection closes. Nothing else in the mock keeps state between requests.
 - **The hash is a contract.** Fake-world data comes from `src/tools/hash.ts`. Changing the hash, the generator or the order in which a tool draws values changes responses users may have snapshotted, so it is a breaking change. The snapshots in `tests/endpoints/__snapshots__/` catch it.

@@ -15,3 +15,19 @@ for (const { id } of REVISIONS) {
   await writeFile(`schemas/${id}/schema.json`, `${JSON.stringify(schema, null, 2)}\n`);
   console.log(`schemas/${id}/schema.json`);
 }
+
+// The official extensions the mock implements, from their own repositories.
+const EXTENSIONS = [
+  {
+    path: "schemas/extensions/tasks/schema.json",
+    url: "https://raw.githubusercontent.com/modelcontextprotocol/ext-tasks/main/schema/2026-07-28/schema.json",
+  },
+];
+
+for (const { path, url } of EXTENSIONS) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+  await mkdir(path.slice(0, path.lastIndexOf("/")), { recursive: true });
+  await writeFile(path, `${JSON.stringify(await res.json(), null, 2)}\n`);
+  console.log(path);
+}
