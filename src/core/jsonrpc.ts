@@ -36,9 +36,10 @@ export interface JsonRpcSuccessResponse {
 export interface JsonRpcErrorResponse {
   jsonrpc: "2.0";
   // Absent when the request id could not be read at all (parse errors,
-  // malformed envelopes). Plain JSON-RPC 2.0 would send `id: null`, but no MCP
-  // schema allows a null id: 2025-11-25 and later omit it instead.
-  id?: JsonRpcId;
+  // malformed envelopes), as 2025-11-25 and later require. Revisions before
+  // them have no valid form for that case and send `id: null`, as plain
+  // JSON-RPC 2.0 does; the core never produces null itself.
+  id?: JsonRpcId | null;
   error: JsonRpcErrorObject;
 }
 

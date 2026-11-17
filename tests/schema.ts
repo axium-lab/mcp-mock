@@ -62,8 +62,21 @@ export function validateAgainst(
   };
 }
 
+// Revisions whose schema requires an id on every error response, leaving an
+// error with no readable request id no valid form at all.
+const ID_REQUIRED: readonly RevisionId[] = ["2025-06-18", "2025-03-26", "2024-11-05"];
+
 // The one most tests want: is this a valid message on the wire for the
 // revision?
+//
+// One deliberate exception: in the revisions above, the mock answers such an
+// error with `id: null`, as JSON-RPC 2.0 and the official SDK server do. The
+// schema cannot express it, so the rest of the message is checked as if the
+// id were a real one.
 export function validateMessage(revision: RevisionId, value: unknown): SchemaResult {
+  const body = value as { id?: unknown; error?: unknown } | null;
+  if (ID_REQUIRED.includes(revision) && body?.id === null && body.error !== undefined) {
+    return validateAgainst(revision, "JSONRPCMessage", { ...body, id: 0 });
+  }
   return validateAgainst(revision, "JSONRPCMessage", value);
 }

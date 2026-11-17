@@ -28,6 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Results cover every content type: text, structured content with an output schema, `image`, `resource_link` and embedded `resource`. Annotations tell read-only lookups from `send_email`.
   - Arguments that break a tool's input schema are a tool execution error (`isError: true`), never a protocol error.
 
+- `/2025-06-18/mcp`, built on the same legacy server as 2025-11-25 with two differences of its own: arguments that break a tool's input schema are a JSON-RPC `-32602` protocol error, as its spec lists them, and an error whose request id cannot be read carries `id: null`, as JSON-RPC 2.0 and the official SDK server send it (its schema has no valid form for that case). `/mcp` now serves it too: `initialize` negotiates between 2025-11-25 and 2025-06-18, and later requests are served as the version their header names.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

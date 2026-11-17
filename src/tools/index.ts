@@ -52,10 +52,20 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+export interface CallOptions {
+  // How arguments that break the input schema are reported. 2025-11-25 made
+  // them a tool execution error (isError) so the model can self-correct;
+  // 2025-06-18 and earlier listed "invalid arguments" among protocol errors.
+  invalidArguments?: "tool-error" | "protocol-error";
+}
+
 // tools/call. Protocol errors (thrown) for a request the model cannot fix:
-// malformed params, unknown tool. Tool execution errors (isError) for
-// arguments it can, as 2025-11-25 made explicit.
-export function callTool(params: Record<string, unknown> | undefined): ToolResult {
+// malformed params, unknown tool. Tool execution errors (isError) for what
+// it can: business failures, and invalid arguments unless told otherwise.
+export function callTool(
+  params: Record<string, unknown> | undefined,
+  options: CallOptions = {},
+): ToolResult {
   const name = params?.name;
   if (typeof name !== "string") {
     throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "name" must be a string');
@@ -69,10 +79,11 @@ export function callTool(params: Record<string, unknown> | undefined): ToolResul
 
   const problem = validateArgs(args, tool.definition.inputSchema);
   if (problem !== undefined) {
-    return {
-      content: [{ type: "text", text: `Invalid arguments for tool ${name}: ${problem}` }],
-      isError: true,
-    };
+    const message = `Invalid arguments for tool ${name}: ${problem}`;
+    if (options.invalidArguments === "protocol-error") {
+      throw new JsonRpcError(ErrorCode.InvalidParams, message);
+    }
+    return { content: [{ type: "text", text: message }], isError: true };
   }
   return tool.run(args);
 }

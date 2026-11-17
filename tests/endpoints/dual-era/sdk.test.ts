@@ -57,9 +57,26 @@ describe("dual-era /mcp through the official SDK", () => {
     expect(results.every((result) => result?.resultType === "complete")).toBe(true);
   });
 
-  it("offers its own legacy version to a client that cannot take it", async () => {
+  it("negotiates down to 2025-06-18 for a client that only speaks it", async () => {
+    const recorder = recordingFetch();
+    await useEcho(
+      await connectClient(url, {
+        mode: "legacy",
+        supportedProtocolVersions: ["2025-06-18"],
+        fetch: recorder.fetch,
+      }),
+    );
+    expect((recorder.bodies[0] as { result: { protocolVersion: string } }).result.protocolVersion).toBe(
+      "2025-06-18",
+    );
+    for (const body of recorder.bodies) {
+      expect(validateMessage("2025-06-18", body)).toEqual({ valid: true, errors: [] });
+    }
+  });
+
+  it("offers its newest legacy version to a client that wants one it does not serve", async () => {
     await expect(
-      connectClient(url, { mode: "legacy", supportedProtocolVersions: ["2025-06-18"] }),
+      connectClient(url, { mode: "legacy", supportedProtocolVersions: ["2024-11-05"] }),
     ).rejects.toThrow(/2025-11-25/);
   });
 });

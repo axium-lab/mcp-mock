@@ -1,3 +1,4 @@
+import { endpoint20250618 } from "./2025-06-18/index.ts";
 import { endpoint20251125 } from "./2025-11-25/index.ts";
 import { endpoint20260728 } from "./2026-07-28/index.ts";
 import { dualEraEndpoint } from "./dual-era/index.ts";
@@ -8,5 +9,6 @@ import type { Endpoint } from "./types.ts";
 export const endpoints: readonly Endpoint[] = [
   endpoint20260728,
   endpoint20251125,
+  endpoint20250618,
   dualEraEndpoint,
 ];

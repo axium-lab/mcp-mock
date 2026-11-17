@@ -1,10 +1,22 @@
 import express, { type Request, type Response, Router } from "express";
 import { parseJson } from "../../core/jsonrpc.ts";
-import { LEGACY_VERSIONS, serveLegacy } from "../2025-11-25/index.ts";
+import { PROFILE_2025_06_18 } from "../2025-06-18/index.ts";
+import { serveLegacy } from "../2025-11-25/index.ts";
+import { PROFILE_2025_11_25, shapeFor } from "../2025-11-25/profile.ts";
 import { hasClaim } from "../2026-07-28/envelope.ts";
-import { bodyErrorHandler, checkPostHeaders, methodNotAllowed, send } from "../2026-07-28/http.ts";
+import {
+  bodyErrorHandler,
+  checkPostHeaders,
+  type ErrorShape,
+  methodNotAllowedWith,
+  send,
+} from "../2026-07-28/http.ts";
 import { MODERN_VERSIONS, serveModern } from "../2026-07-28/index.ts";
 import type { Endpoint } from "../types.ts";
+
+// The legacy revisions /mcp serves, newest first: initialize negotiates among
+// them, and later requests are served as the one their header names.
+const LEGACY_PROFILES = [PROFILE_2025_11_25, PROFILE_2025_06_18];
 
 // /mcp serves every client, whatever era it speaks, the way the spec
 // describes a dual-era server: the era is read from how each request opens,
@@ -34,22 +46,35 @@ function isModern(body: unknown, headerVersion: string | undefined): boolean {
   );
 }
 
+// Errors raised before the body says which era it is (transport refusals,
+// malformed JSON) take the shape of the legacy revision the header names, if
+// any; otherwise the modern shape, which 2025-11-25 shares.
+function shapeForHeader(req: Request): ErrorShape | undefined {
+  const headerVersion = req.get("mcp-protocol-version")?.trim();
+  const profile = LEGACY_PROFILES.find((candidate) => candidate.revision === headerVersion);
+  return profile ? shapeFor(profile) : undefined;
+}
+
 async function handlePost(req: Request, res: Response): Promise<void> {
   const refused = checkPostHeaders(req);
-  if (refused) return send(res, refused);
+  if (refused) return send(res, refused, shapeForHeader(req));
 
   const json = parseJson(typeof req.body === "string" ? req.body : "");
-  if (!json.ok) return send(res, { status: 400, body: json.response });
+  if (!json.ok) return send(res, { status: 400, body: json.response }, shapeForHeader(req));
 
   const headerVersion = req.get("mcp-protocol-version")?.trim();
   if (isModern(json.value, headerVersion)) return serveModern(json.value, req, res);
-  return serveLegacy(json.value, req, res);
+  return serveLegacy(json.value, req, res, LEGACY_PROFILES);
+}
+
+function methodNotAllowed(req: Request, res: Response): void {
+  methodNotAllowedWith(shapeForHeader(req) ?? ((body) => body))(req, res);
 }
 
 export const dualEraEndpoint: Endpoint = {
   name: "dual-era",
   mountPath: "",
-  revisions: [...MODERN_VERSIONS, ...LEGACY_VERSIONS],
+  revisions: [...MODERN_VERSIONS, "2025-11-25", "2025-06-18"],
   createRouter() {
     const router = Router();
     router.use("/mcp", express.text({ type: () => true, limit: "4mb" }));

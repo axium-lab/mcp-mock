@@ -1,11 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
+import type { JsonRpcErrorResponse } from "../../core/jsonrpc.ts";
 import { type Rejection, reject, TRANSPORT_ERROR_CODE } from "./errors.ts";
 
 // Streamable HTTP mechanics that did not change between 2025-03-26 and
 // 2026-07-28. Older revisions' endpoints import them from here.
 
-export function send(res: Response, { status, body }: Rejection): void {
-  res.status(status).json(body);
+// Gives an error body its revision's final form. The core omits the id of an
+// error whose request id could not be read, as 2025-11-25 and later require;
+// earlier revisions pass a shape that writes `id: null` instead.
+export type ErrorShape = (body: JsonRpcErrorResponse) => JsonRpcErrorResponse;
+
+const asIs: ErrorShape = (body) => body;
+
+export function send(res: Response, { status, body }: Rejection, shape: ErrorShape = asIs): void {
+  res.status(status).json(shape(body));
 }
 
 function mediaType(value: string | undefined): string {
@@ -43,21 +51,23 @@ export function checkPostHeaders(req: Request): Rejection | undefined {
   return undefined;
 }
 
-export function methodNotAllowed(_req: Request, res: Response): void {
-  res.setHeader("Allow", "POST");
-  send(res, reject(405, undefined, TRANSPORT_ERROR_CODE, "Method not allowed."));
+export function methodNotAllowedWith(shape: ErrorShape) {
+  return (_req: Request, res: Response): void => {
+    res.setHeader("Allow", "POST");
+    send(res, reject(405, undefined, TRANSPORT_ERROR_CODE, "Method not allowed."), shape);
+  };
 }
 
 // Body-parser failures (oversized bodies, unreadable encodings) keep their
 // HTTP status and still answer with a JSON-RPC error body.
-export function bodyErrorHandler(
-  err: unknown,
-  _req: Request,
-  res: Response,
-  next: NextFunction,
-): void {
-  const status = (err as { status?: unknown }).status;
-  if (typeof status !== "number") return next(err);
-  const message = err instanceof Error ? err.message : "Bad Request";
-  send(res, reject(status, undefined, TRANSPORT_ERROR_CODE, message));
+export function bodyErrorHandlerWith(shape: ErrorShape) {
+  return (err: unknown, _req: Request, res: Response, next: NextFunction): void => {
+    const status = (err as { status?: unknown }).status;
+    if (typeof status !== "number") return next(err);
+    const message = err instanceof Error ? err.message : "Bad Request";
+    send(res, reject(status, undefined, TRANSPORT_ERROR_CODE, message), shape);
+  };
 }
+
+export const methodNotAllowed = methodNotAllowedWith(asIs);
+export const bodyErrorHandler = bodyErrorHandlerWith(asIs);

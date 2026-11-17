@@ -40,6 +40,20 @@ describe.each(REVISIONS.map(({ id }) => id))("schema %s", (revision) => {
   });
 });
 
+describe("the id: null exception", () => {
+  const nullId = { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Parse error" } };
+
+  it("accepts id: null only where the schema leaves no valid form", () => {
+    expect(validateMessage("2025-06-18", nullId).valid).toBe(true);
+    expect(validateMessage("2025-11-25", nullId).valid).toBe(false);
+    expect(validateMessage("2026-07-28", nullId).valid).toBe(false);
+  });
+
+  it("still checks the rest of the message", () => {
+    expect(validateMessage("2025-06-18", { ...nullId, error: { code: "x" } }).valid).toBe(false);
+  });
+});
+
 describe("revision differences the schemas encode", () => {
   it("only 2026-07-28 requires resultType on results", () => {
     const bare = successResponse(1, {});

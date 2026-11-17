@@ -35,6 +35,11 @@ const WIRES: Wire[] = [
     headers: () => ({ "mcp-protocol-version": "2025-11-25" }),
     params: (params) => params,
   },
+  {
+    revision: "2025-06-18",
+    headers: () => ({ "mcp-protocol-version": "2025-06-18" }),
+    params: (params) => params,
+  },
 ];
 
 describe.each(WIRES.map((wire) => [wire.revision, wire] as const))("catalog over %s", (revision, wire) => {
