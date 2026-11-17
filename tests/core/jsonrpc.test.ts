@@ -18,16 +18,16 @@ const request = (method: string, params?: Record<string, unknown>): JsonRpcReque
 });
 
 describe("parseJson", () => {
-  it("answers a syntax error with a parse error and a null id", () => {
+  it("answers a syntax error with a parse error and no id", () => {
     const parsed = parseJson("{not json");
     expect(parsed).toEqual({
       ok: false,
       response: {
         jsonrpc: "2.0",
-        id: null,
         error: { code: ErrorCode.ParseError, message: "Parse error" },
       },
     });
+    if (!parsed.ok) expect("id" in parsed.response).toBe(false);
   });
 });
 
@@ -54,11 +54,11 @@ describe("parseMessage", () => {
   });
 
   it.each([
-    ["a non-object", [1, 2], null],
+    ["a non-object", [1, 2], undefined],
     ["a missing jsonrpc", { id: 1, method: "m" }, 1],
     ["a wrong jsonrpc", { jsonrpc: "1.0", id: 1, method: "m" }, 1],
-    ["a null id", { jsonrpc: "2.0", id: null, method: "m" }, null],
-    ["a fractional id", { jsonrpc: "2.0", id: 1.5, method: "m" }, null],
+    ["a null id", { jsonrpc: "2.0", id: null, method: "m" }, undefined],
+    ["a fractional id", { jsonrpc: "2.0", id: 1.5, method: "m" }, undefined],
     ["a non-string method", { jsonrpc: "2.0", id: 1, method: 7 }, 1],
     ["array params", { jsonrpc: "2.0", id: 1, method: "m", params: [1] }, 1],
     ["result and error together", { jsonrpc: "2.0", id: 1, result: {}, error: {} }, 1],
@@ -69,6 +69,7 @@ describe("parseMessage", () => {
     expect(parsed.kind).toBe("invalid");
     if (parsed.kind !== "invalid") return;
     expect(parsed.response.id).toBe(id);
+    expect("id" in parsed.response).toBe(id !== undefined);
     expect(parsed.response.error.code).toBe(ErrorCode.InvalidRequest);
   });
 });

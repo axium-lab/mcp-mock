@@ -1,6 +1,6 @@
 import express, { type Express } from "express";
-import pkg from "../package.json" with { type: "json" };
 import { errorHandler, notFoundHandler } from "./core/errors.ts";
+import { SERVER_INFO } from "./core/server-info.ts";
 import { endpoints } from "./endpoints/index.ts";
 
 // Builds the Express app without calling listen(), so tests can mount it on an
@@ -8,10 +8,8 @@ import { endpoints } from "./endpoints/index.ts";
 export function createApp(): Express {
   const app = express();
 
-  // The version is read from package.json so a running container can be
-  // matched against the release it was built from.
   app.get("/health", (_req, res) => {
-    res.json({ status: "ok", version: pkg.version });
+    res.json({ status: "ok", version: SERVER_INFO.version });
   });
 
   for (const endpoint of endpoints) {

@@ -13,5 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The five supported spec revisions (2026-07-28, 2025-11-25, 2025-06-18, 2025-03-26 and 2024-11-05) and their era, modern or legacy.
 - Official `schema.json` of every revision, vendored under `schemas/`, and a test harness that validates messages against them.
 - Tests through the official MCP TypeScript SDK client.
+- `/2026-07-28/mcp`: the modern, stateless revision over Streamable HTTP. Each request carries its protocol version and client capabilities in `_meta`, with no handshake and no session. It serves `server/discover`, `tools/list` (with `ttlMs`, `cacheScope` and a deterministic order) and `tools/call` with an `echo` tool, and every result carries `resultType` and the server identity in `_meta`.
+- Request validation in the same order as the official SDK server: JSON-RPC shape, era, `_meta` envelope, header/body agreement, supported version, the standard `MCP-Protocol-Version`, `Mcp-Method` and `Mcp-Name` headers (Base64 sentinel included), and method existence. Each failure answers with the HTTP status and error code the spec assigns (`-32020`, `-32022`, `-32602`, `-32601`), and errors from handlers travel in-band with HTTP 200.
+- Legacy clients reaching `/2026-07-28/mcp` (an `initialize`, or any request without `_meta`) get an `UnsupportedProtocolVersionError` that lists the versions served. GET and DELETE answer `405`, and a session id is ignored and never minted.
+
+### Fixed
+
+- JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.
 
 [Unreleased]: https://github.com/axium-lab/mcp-mock/commits/main

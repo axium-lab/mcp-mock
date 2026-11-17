@@ -35,9 +35,10 @@ export interface JsonRpcSuccessResponse {
 
 export interface JsonRpcErrorResponse {
   jsonrpc: "2.0";
-  // Only null when the request id could not be read at all (parse errors,
-  // malformed envelopes), as JSON-RPC 2.0 prescribes.
-  id: JsonRpcId | null;
+  // Absent when the request id could not be read at all (parse errors,
+  // malformed envelopes). Plain JSON-RPC 2.0 would send `id: null`, but no MCP
+  // schema allows a null id: 2025-11-25 and later omit it instead.
+  id?: JsonRpcId;
   error: JsonRpcErrorObject;
 }
 
@@ -92,12 +93,13 @@ function isId(value: unknown): value is JsonRpcId {
 }
 
 export function errorResponse(
-  id: JsonRpcId | null,
+  id: JsonRpcId | undefined,
   code: number,
   message: string,
   data?: unknown,
 ): JsonRpcErrorResponse {
-  return { jsonrpc: "2.0", id, error: new JsonRpcError(code, message, data).toObject() };
+  const error = new JsonRpcError(code, message, data).toObject();
+  return id === undefined ? { jsonrpc: "2.0", error } : { jsonrpc: "2.0", id, error };
 }
 
 export function successResponse(
@@ -107,15 +109,15 @@ export function successResponse(
   return { jsonrpc: "2.0", id, result };
 }
 
-// Parses raw JSON text. A syntax error is the one failure that leaves no id to
-// answer to, hence its null id.
+// Parses raw JSON text. A syntax error leaves no id to answer to, hence the
+// error response without one.
 export function parseJson(
   text: string,
 ): { ok: true; value: unknown } | { ok: false; response: JsonRpcErrorResponse } {
   try {
     return { ok: true, value: JSON.parse(text) };
   } catch {
-    return { ok: false, response: errorResponse(null, ErrorCode.ParseError, "Parse error") };
+    return { ok: false, response: errorResponse(undefined, ErrorCode.ParseError, "Parse error") };
   }
 }
 
@@ -123,14 +125,14 @@ export function parseJson(
 // not a well-formed message comes back as an Invalid Request response, echoing
 // the id when one could be read.
 export function parseMessage(value: unknown): ParsedMessage {
-  const invalid = (reason: string, id: JsonRpcId | null = null): ParsedMessage => ({
+  const invalid = (reason: string, id?: JsonRpcId): ParsedMessage => ({
     kind: "invalid",
     response: errorResponse(id, ErrorCode.InvalidRequest, `Invalid Request: ${reason}`),
   });
 
   if (!isObject(value)) return invalid("expected a JSON object");
 
-  const id = isId(value.id) ? value.id : null;
+  const id = isId(value.id) ? value.id : undefined;
   if (value.jsonrpc !== "2.0") return invalid('"jsonrpc" must be "2.0"', id);
 
   const hasId = "id" in value;

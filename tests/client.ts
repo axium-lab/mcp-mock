@@ -16,6 +16,7 @@ import {
 export interface ClientOptions {
   mode: VersionNegotiationMode;
   supportedProtocolVersions?: string[];
+  fetch?: typeof fetch;
 }
 
 export async function connectClient(url: string, options: ClientOptions): Promise<Client> {
@@ -28,6 +29,22 @@ export async function connectClient(url: string, options: ClientOptions): Promis
         : {}),
     },
   );
-  await client.connect(new StreamableHTTPClientTransport(new URL(url)));
+  await client.connect(
+    new StreamableHTTPClientTransport(new URL(url), options.fetch ? { fetch: options.fetch } : {}),
+  );
   return client;
+}
+
+// A fetch that records every JSON body the server answers with, so a test
+// driven through the SDK can still check the exact bytes against the schema.
+export function recordingFetch(): { fetch: typeof fetch; bodies: unknown[] } {
+  const bodies: unknown[] = [];
+  const recording = (async (input: Parameters<typeof fetch>[0], init?: RequestInit) => {
+    const res = await fetch(input, init);
+    if ((res.headers.get("content-type") ?? "").includes("application/json")) {
+      bodies.push(await res.clone().json());
+    }
+    return res;
+  }) as typeof fetch;
+  return { fetch: recording, bodies };
 }
