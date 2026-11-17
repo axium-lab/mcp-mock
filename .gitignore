@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+
+# Working notes, kept out of the repo.
+brainstorming.md
