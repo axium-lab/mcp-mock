@@ -1,0 +1,49 @@
+// The catalog every endpoint lists, in its fixed order. Written out rather
+// than imported from src/, so a tool added, removed or reordered by accident
+// fails the tests.
+export const TOOL_NAMES = [
+  "echo",
+  "add",
+  "calculate",
+  "transform_text",
+  "text_stats",
+  "sort_list",
+  "convert_units",
+  "hash_text",
+  "date_diff",
+  "color_swatch",
+  "get_weather",
+  "get_forecast",
+  "search_web",
+  "get_stock_price",
+  "convert_currency",
+  "get_user",
+  "geocode",
+  "get_flight_status",
+  "read_file",
+  "send_email",
+];
+
+// One valid call per tool, for snapshots and schema checks.
+export const SAMPLES: Record<string, Record<string, unknown>> = {
+  echo: { text: "Hello!" },
+  add: { a: 2, b: 3.5 },
+  calculate: { expression: "(2 + 3) * 4 - 2^3" },
+  transform_text: { text: "¡Hola, Mundo!", operation: "slug" },
+  text_stats: { text: "one two\nthree" },
+  sort_list: { items: ["pear", "Apple", "fig"], order: "asc" },
+  convert_units: { value: 100, from: "c", to: "f" },
+  hash_text: { text: "abc", algorithm: "sha256" },
+  date_diff: { from: "2024-01-01", to: "2024-03-01" },
+  color_swatch: { color: "#ff8800", size: 2 },
+  get_weather: { city: "Madrid" },
+  get_forecast: { city: "Oslo", days: 3 },
+  search_web: { query: "model context protocol", limit: 2 },
+  get_stock_price: { symbol: "acme" },
+  convert_currency: { amount: 100, from: "EUR", to: "JPY" },
+  get_user: { user_id: "u_42" },
+  geocode: { address: "1 Infinite Loop" },
+  get_flight_status: { flight_number: "IB3456" },
+  read_file: { path: "/etc/app/config.json" },
+  send_email: { to: "ada@example.com", subject: "Hi", body: "Hello there" },
+};

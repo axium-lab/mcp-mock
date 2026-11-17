@@ -1,6 +1,6 @@
 import { ErrorCode, type Handlers, JsonRpcError } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
-import { callTool, checkNoCursor, listTools } from "../2026-07-28/tools.ts";
+import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
 
 export const REVISION = "2025-11-25";
 

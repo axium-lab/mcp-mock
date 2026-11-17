@@ -21,6 +21,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `/mcp`: a dual-era endpoint that serves any client without configuration. Each request's era is read from how it opens, never remembered: a request with the `_meta` envelope, or with a modern `MCP-Protocol-Version` header, is served as 2026-07-28, and everything else, `initialize` included, as 2025-11-25. Each era advertises only its own versions, so a modern client is never offered a legacy one to put in `_meta`.
 
+- A catalog of 20 tools, served by every endpoint in a fixed order:
+  - Ten real computations: `echo`, `add`, `calculate` (a safe parser, no `eval`), `transform_text`, `text_stats`, `sort_list`, `convert_units`, `hash_text`, `date_diff` and `color_swatch`, which returns a real PNG.
+  - Ten fake-world tools: `get_weather`, `get_forecast`, `search_web`, `get_stock_price`, `convert_currency`, `get_user`, `geocode`, `get_flight_status`, `read_file` and `send_email`. Their data is derived from a hash of the normalized arguments: the same arguments always return the same bytes, on Bun and on Node, and different arguments return different, internally consistent data.
+  - Each fake-world tool fails on one documented reserved value (`city: "Atlantis"`, `user_id: "missing"`, `to: "bounce@example.com"`…), so tests can reach every failure path.
+  - Results cover every content type: text, structured content with an output schema, `image`, `resource_link` and embedded `resource`. Annotations tell read-only lookups from `send_email`.
+  - Arguments that break a tool's input schema are a tool execution error (`isError: true`), never a protocol error.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

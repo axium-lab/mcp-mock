@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import { TOOL_NAMES } from "../../catalog.ts";
 import { connectClient, recordingFetch } from "../../client.ts";
 import { validateMessage } from "../../schema.ts";
 import { type RunningServer, startServer, stopServer } from "../../server.ts";
@@ -20,7 +21,7 @@ describe("2026-07-28 through the official SDK", () => {
     const client = await connectClient(url, { mode: { pin: "2026-07-28" }, fetch: recorder.fetch });
 
     const { tools } = await client.listTools();
-    expect(tools.map((tool) => tool.name)).toEqual(["echo"]);
+    expect(tools.map((tool) => tool.name)).toEqual(TOOL_NAMES);
 
     const result = await client.callTool({ name: "echo", arguments: { text: "Hello!" } });
     expect(result.content).toEqual([{ type: "text", text: "Echo: Hello!" }]);
@@ -62,7 +63,7 @@ describe("2026-07-28 through the official SDK", () => {
   it("stays modern with a dual-era client", async () => {
     const client = await connectClient(url, { mode: "auto" });
     const { tools } = await client.listTools();
-    expect(tools.map((tool) => tool.name)).toEqual(["echo"]);
+    expect(tools.map((tool) => tool.name)).toEqual(TOOL_NAMES);
     await client.close();
   });
 
