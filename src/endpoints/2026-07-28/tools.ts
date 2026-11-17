@@ -1,5 +1,8 @@
+import { ErrorCode, JsonRpcError } from "../../core/jsonrpc.ts";
+
 // The tools this revision serves. Phase 1 ships only `echo`; the full
-// catalog comes later. Pure: definitions and execution, no transport.
+// catalog comes later. Pure: definitions and execution, no transport. Older
+// revisions import it and reshape the result where their wire format differs.
 
 export interface ToolDefinition {
   name: string;
@@ -53,6 +56,39 @@ export function listTools(): ToolDefinition[] {
   return TOOLS.map((tool) => tool.definition);
 }
 
-export function findTool(name: string): Tool | undefined {
-  return TOOLS.find((tool) => tool.definition.name === name);
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// tools/call. Protocol errors (thrown) for a request the model cannot fix:
+// malformed params, unknown tool. Tool execution errors (isError) for
+// arguments it can. 2025-11-25 is the first revision to say so explicitly.
+export function callTool(params: Record<string, unknown> | undefined): ToolResult {
+  const name = params?.name;
+  if (typeof name !== "string") {
+    throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "name" must be a string');
+  }
+  const args = params?.arguments ?? {};
+  if (!isObject(args)) {
+    throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "arguments" must be an object');
+  }
+  const tool = TOOLS.find((candidate) => candidate.definition.name === name);
+  if (!tool) throw new JsonRpcError(ErrorCode.InvalidParams, `Unknown tool: ${name}`);
+
+  const problem = tool.validate(args);
+  if (problem !== undefined) {
+    return {
+      content: [{ type: "text", text: `Invalid arguments for tool ${name}: ${problem}` }],
+      isError: true,
+    };
+  }
+  return tool.run(args);
+}
+
+// The mock never paginates, so it never issues a cursor: any cursor a client
+// sends is one it made up.
+export function checkNoCursor(params: Record<string, unknown> | undefined): void {
+  if (params?.cursor !== undefined) {
+    throw new JsonRpcError(ErrorCode.InvalidParams, "Invalid params: unknown cursor");
+  }
 }

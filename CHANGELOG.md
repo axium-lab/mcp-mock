@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Request validation in the same order as the official SDK server: JSON-RPC shape, era, `_meta` envelope, header/body agreement, supported version, the standard `MCP-Protocol-Version`, `Mcp-Method` and `Mcp-Name` headers (Base64 sentinel included), and method existence. Each failure answers with the HTTP status and error code the spec assigns (`-32020`, `-32022`, `-32602`, `-32601`), and errors from handlers travel in-band with HTTP 200.
 - Legacy clients reaching `/2026-07-28/mcp` (an `initialize`, or any request without `_meta`) get an `UnsupportedProtocolVersionError` that lists the versions served. GET and DELETE answer `405`, and a session id is ignored and never minted.
 
+- `/2025-11-25/mcp`: the first legacy revision, served without sessions. It answers `initialize` (always with its own version, as the spec's negotiation prescribes for a version it does not support), `ping`, `tools/list` and `tools/call` with the same `echo` tool, without the 2026-07-28 additions. Notifications and posted responses get `202`, a `MCP-Protocol-Version` header naming another version gets `400`, and GET and DELETE answer `405`, since the mock offers no server stream and no session to end. Clients that connect as legacy by default, like the MCP Inspector, work against it unchanged.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.
