@@ -13,6 +13,7 @@ import {
   checkPostHeaders,
   methodNotAllowedWith,
   send,
+  sendForcedStatus,
 } from "../2026-07-28/http.ts";
 import type { Endpoint } from "../types.ts";
 import { legacyHandlers } from "./handlers.ts";
@@ -186,6 +187,7 @@ export function legacyRouter(profiles: readonly LegacyProfile[]): Router {
     (async () => {
       const refused = checkPostHeaders(req);
       if (refused) return send(res, refused, shape);
+      if (sendForcedStatus(req, res, shape)) return;
       const json = parseJson(typeof req.body === "string" ? req.body : "");
       if (!json.ok) return send(res, { status: 400, body: json.response }, shape);
       await serveLegacy(json.value, req, res, profiles);

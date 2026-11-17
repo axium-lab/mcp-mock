@@ -12,6 +12,7 @@ import {
   type ErrorShape,
   methodNotAllowedWith,
   send,
+  sendForcedStatus,
 } from "../2026-07-28/http.ts";
 import { MODERN_VERSIONS, serveModern } from "../2026-07-28/index.ts";
 import type { Endpoint } from "../types.ts";
@@ -65,6 +66,7 @@ function shapeForHeader(req: Request): ErrorShape | undefined {
 async function handlePost(req: Request, res: Response): Promise<void> {
   const refused = checkPostHeaders(req);
   if (refused) return send(res, refused, shapeForHeader(req));
+  if (sendForcedStatus(req, res, shapeForHeader(req))) return;
 
   const json = parseJson(typeof req.body === "string" ? req.body : "");
   if (!json.ok) return send(res, { status: 400, body: json.response }, shapeForHeader(req));

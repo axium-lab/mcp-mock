@@ -3,7 +3,13 @@ import { dispatch, parseJson } from "../../core/jsonrpc.ts";
 import type { Endpoint } from "../types.ts";
 import { classify } from "./classify.ts";
 import { handlers, REVISION } from "./handlers.ts";
-import { bodyErrorHandler, checkPostHeaders, methodNotAllowed, send } from "./http.ts";
+import {
+  bodyErrorHandler,
+  checkPostHeaders,
+  methodNotAllowed,
+  send,
+  sendForcedStatus,
+} from "./http.ts";
 
 export const MODERN_VERSIONS = [REVISION] as const;
 
@@ -43,6 +49,7 @@ export async function serveModern(body: unknown, req: Request, res: Response): P
 async function handlePost(req: Request, res: Response): Promise<void> {
   const refused = checkPostHeaders(req);
   if (refused) return send(res, refused);
+  if (sendForcedStatus(req, res)) return;
 
   const json = parseJson(typeof req.body === "string" ? req.body : "");
   if (!json.ok) return send(res, { status: 400, body: json.response });

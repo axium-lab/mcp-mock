@@ -1,20 +1,35 @@
 import { randomUUID } from "node:crypto";
 import express, { type Request, type Response, Router } from "express";
+import { CONTROL, forcedStatus } from "../../core/control.ts";
 import { dispatch, parseJson, parseMessage } from "../../core/jsonrpc.ts";
 import { PROFILE_2025_03_26 } from "../2025-03-26/index.ts";
 import { answerBatch, handlersFor, profileFor } from "../2025-11-25/index.ts";
 import type { LegacyProfile } from "../2025-11-25/profile.ts";
 import type { Endpoint } from "../types.ts";
 
-// 2024-11-05 is 2025-03-26 without batching and without tool annotations,
-// which arrived in 2025-03-26 (and with them the only place a display title
-// could go, so the title is dropped).
+// 2024-11-05 is 2025-03-26 without batching, without tool annotations, which
+// arrived in 2025-03-26 (and with them the only place a display title could
+// go, so the title is dropped), and without audio content. The catalog never
+// returns audio, but a result forced from the test can.
 export const PROFILE_2024_11_05: LegacyProfile = {
   ...PROFILE_2025_03_26,
   revision: "2024-11-05",
   batching: false,
   adaptDefinition: ({ name, description, inputSchema }) => ({ name, description, inputSchema }),
+  adaptResult: ({ content, isError }) => ({
+    content: content.filter((block) => block.type !== "resource_link" && (block.type as string) !== "audio"),
+    ...(isError !== undefined && { isError }),
+  }),
 };
+
+// The HTTP failure a test forces with x-mcp-mock-status, answered in plain
+// text like the transport's other refusals. Returns whether it answered.
+function sendForcedStatus(req: Request, res: Response): boolean {
+  const forced = forcedStatus(req.get(CONTROL.statusHeader));
+  if (!forced) return false;
+  res.status(forced.status).set(forced.headers).type("text/plain").send(forced.message);
+  return true;
+}
 
 // The HTTP+SSE transport of 2024-11-05, the one part of the mock that keeps
 // state. A client opens GET <base>/sse; the first event names the URL it must
@@ -48,6 +63,7 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
   const router = Router();
 
   router.get("/sse", (req, res) => {
+    if (sendForcedStatus(req, res)) return;
     const sessionId = randomUUID();
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
@@ -73,6 +89,7 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
         res.status(400).type("text/plain").send(`Unsupported content-type: ${contentType || "none"}`);
         return;
       }
+      if (sendForcedStatus(req, res)) return;
 
       const json = parseJson(typeof req.body === "string" ? req.body : "");
       const profile = session.profile ?? native;

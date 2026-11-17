@@ -1,3 +1,4 @@
+import { forcedResult } from "../core/control.ts";
 import { ErrorCode, JsonRpcError } from "../core/jsonrpc.ts";
 import { add } from "./calc/add.ts";
 import { calculate } from "./calc/calculate.ts";
@@ -70,6 +71,13 @@ export function callTool(
   if (typeof name !== "string") {
     throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "name" must be a string');
   }
+
+  // A result forced from the test replaces the tool's own, for any name and
+  // without validating the arguments: the test decides the answer. Its blocks
+  // pass through unchecked, so they share the catalog's type only nominally.
+  const forced = forcedResult(params);
+  if (forced) return forced as unknown as ToolResult;
+
   const args = params?.arguments ?? {};
   if (!isObject(args)) {
     throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "arguments" must be an object');

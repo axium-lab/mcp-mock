@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { CONTROL, forcedStatus } from "../../core/control.ts";
 import type { JsonRpcErrorResponse } from "../../core/jsonrpc.ts";
 import { type Rejection, reject, TRANSPORT_ERROR_CODE } from "./errors.ts";
 
@@ -49,6 +50,17 @@ export function checkPostHeaders(req: Request): Rejection | undefined {
     );
   }
   return undefined;
+}
+
+// Answers the HTTP failure a test forces with x-mcp-mock-status, as a JSON-RPC
+// error body the way the transport's other refusals are. Returns whether it
+// answered.
+export function sendForcedStatus(req: Request, res: Response, shape: ErrorShape = asIs): boolean {
+  const forced = forcedStatus(req.get(CONTROL.statusHeader));
+  if (!forced) return false;
+  for (const [name, value] of Object.entries(forced.headers)) res.setHeader(name, value);
+  send(res, reject(forced.status, undefined, TRANSPORT_ERROR_CODE, forced.message), shape);
+  return true;
 }
 
 export function methodNotAllowedWith(shape: ErrorShape) {

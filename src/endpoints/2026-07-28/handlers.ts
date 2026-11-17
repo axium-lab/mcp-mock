@@ -1,7 +1,8 @@
+import { withControl } from "../../core/control.ts";
 import type { Handlers } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
-import { META } from "./envelope.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
+import { META } from "./envelope.ts";
 
 export const REVISION = "2026-07-28";
 
@@ -20,7 +21,8 @@ function complete(result: object): Record<string, unknown> {
   return { ...result, resultType: "complete", _meta: { [META.serverInfo]: SERVER_INFO } };
 }
 
-export const handlers: Handlers<RequestContext> = {
+// withControl lets a request force a JSON-RPC error from the test.
+export const handlers: Handlers<RequestContext> = withControl({
   requests: {
     "server/discover": () =>
       complete({
@@ -36,4 +38,4 @@ export const handlers: Handlers<RequestContext> = {
 
     "tools/call": (params) => complete(callTool(params)),
   },
-};
+});

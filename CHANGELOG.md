@@ -36,6 +36,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - 2024-11-05 over its deprecated HTTP+SSE transport, at `/2024-11-05/sse`: the first event names the message endpoint, POSTs are answered `202 Accepted`, and every response travels on the stream as a `message` event. Open streams are kept in memory by session id and forgotten when the connection closes, the one piece of state in the mock. Tools come without annotations or titles, which this revision did not have. Plain-text answers and error bodies follow the official SDK's SSE server.
 - The same transport at the root, `/sse` and `/messages`, next to `/mcp`, as the spec suggests for servers that keep serving 2024-11-05 clients. Over it, `initialize` negotiates any legacy revision, and the session remembers the one negotiated.
 
+- Control from the test, with nothing registered beforehand and nothing remembered between requests:
+  - `_meta["com.mcp-mock/response"]` on a `tools/call` replaces its result with the given `text`, `content`, `structuredContent` and `isError`, for any tool name and without argument validation. Structured content without content is repeated as JSON text, and the result is adapted to each revision like the catalog's own.
+  - `_meta["com.mcp-mock/error"]` makes any request fail with the given JSON-RPC `code`, `message` and `data`.
+  - The `x-mcp-mock-status` header forces an HTTP failure from 400 to 599 on every endpoint and transport, with `Retry-After` on `429`, as `x-llm-mock-status` does in llm-mock. An out-of-range value is refused with `400` rather than ignored.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

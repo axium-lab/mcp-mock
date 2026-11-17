@@ -1,3 +1,4 @@
+import { withControl } from "../../core/control.ts";
 import { ErrorCode, type Handlers, JsonRpcError } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
@@ -13,7 +14,8 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, 
   const adaptDefinition = profile.adaptDefinition ?? ((definition) => ({ ...definition }));
   const adaptResult = profile.adaptResult ?? ((result) => ({ ...result }));
 
-  return {
+  // withControl lets a request force a JSON-RPC error from the test.
+  return withControl({
     requests: {
       // The profile was chosen from the requested version (or as the newest
       // served when that one is not), so answering with its revision is the
@@ -48,5 +50,5 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, 
       "tools/call": (params) =>
         adaptResult(callTool(params, { invalidArguments: profile.invalidArguments })),
     },
-  };
+  });
 }
