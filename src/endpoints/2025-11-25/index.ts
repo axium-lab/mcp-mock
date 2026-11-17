@@ -5,45 +5,40 @@ import { bodyErrorHandler, checkPostHeaders, methodNotAllowed, send } from "../2
 import type { Endpoint } from "../types.ts";
 import { handlers, REVISION } from "./handlers.ts";
 
-const SUPPORTED_VERSIONS = [REVISION] as const;
+export const LEGACY_VERSIONS = [REVISION] as const;
 
-// Streamable HTTP as of 2025-11-25, served without sessions. The spec makes
-// both optional: a server MAY assign an Mcp-Session-Id at initialize and MAY
-// refuse the GET stream with 405. Without them every POST stands alone, which
-// keeps the mock stateless; the cost is that a request is served even if no
-// initialize came before it, since nothing ties the two together.
-async function handlePost(req: Request, res: Response): Promise<void> {
-  const refused = checkPostHeaders(req);
-  if (refused) return send(res, refused);
-
-  const json = parseJson(typeof req.body === "string" ? req.body : "");
-  if (!json.ok) return send(res, { status: 400, body: json.response });
-
+// Serves one already-decoded POST body as 2025-11-25 Streamable HTTP, without
+// sessions. The spec makes them optional: a server MAY assign an
+// Mcp-Session-Id at initialize and MAY refuse the GET stream with 405.
+// Without them every POST stands alone, which keeps the mock stateless; the
+// cost is that a request is served even if no initialize came before it,
+// since nothing ties the two together. Exported for the dual-era /mcp
+// endpoint, which routes legacy traffic here.
+export async function serveLegacy(body: unknown, req: Request, res: Response): Promise<void> {
   // Batches were removed in 2025-06-18: the body is a single message.
-  if (Array.isArray(json.value)) {
+  if (Array.isArray(body)) {
     return send(
       res,
       reject(400, undefined, ErrorCode.InvalidRequest, "Invalid Request: JSON-RPC batches are not supported"),
     );
   }
-  const parsed = parseMessage(json.value);
+  const parsed = parseMessage(body);
   if (parsed.kind === "invalid") return send(res, { status: 400, body: parsed.response });
 
   // Every message after initialize carries the negotiated version. A missing
   // header is accepted: the spec's fallback (assume 2025-03-26) is for servers
-  // with no other way to tell, and this endpoint's path already pins the
-  // version. A header naming another version is refused, as the official SDK
-  // server does.
+  // with no other way to tell, and this endpoint only speaks 2025-11-25. A
+  // header naming another version is refused, as the official SDK server does.
   const isInitialize = parsed.kind === "request" && parsed.message.method === "initialize";
   const version = req.get("mcp-protocol-version")?.trim();
-  if (!isInitialize && version !== undefined && !SUPPORTED_VERSIONS.includes(version as typeof REVISION)) {
+  if (!isInitialize && version !== undefined && !LEGACY_VERSIONS.includes(version as typeof REVISION)) {
     return send(
       res,
       reject(
         400,
         undefined,
         TRANSPORT_ERROR_CODE,
-        `Bad Request: Unsupported protocol version: ${version} (supported versions: ${SUPPORTED_VERSIONS.join(", ")})`,
+        `Bad Request: Unsupported protocol version: ${version} (supported versions: ${LEGACY_VERSIONS.join(", ")})`,
       ),
     );
   }
@@ -61,10 +56,20 @@ async function handlePost(req: Request, res: Response): Promise<void> {
   res.status(200).json(response);
 }
 
+async function handlePost(req: Request, res: Response): Promise<void> {
+  const refused = checkPostHeaders(req);
+  if (refused) return send(res, refused);
+
+  const json = parseJson(typeof req.body === "string" ? req.body : "");
+  if (!json.ok) return send(res, { status: 400, body: json.response });
+
+  await serveLegacy(json.value, req, res);
+}
+
 export const endpoint20251125: Endpoint = {
   name: REVISION,
   mountPath: `/${REVISION}`,
-  revisions: SUPPORTED_VERSIONS,
+  revisions: LEGACY_VERSIONS,
   createRouter() {
     const router = Router();
     router.use("/mcp", express.text({ type: () => true, limit: "4mb" }));

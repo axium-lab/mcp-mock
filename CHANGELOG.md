@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `/2025-11-25/mcp`: the first legacy revision, served without sessions. It answers `initialize` (always with its own version, as the spec's negotiation prescribes for a version it does not support), `ping`, `tools/list` and `tools/call` with the same `echo` tool, without the 2026-07-28 additions. Notifications and posted responses get `202`, a `MCP-Protocol-Version` header naming another version gets `400`, and GET and DELETE answer `405`, since the mock offers no server stream and no session to end. Clients that connect as legacy by default, like the MCP Inspector, work against it unchanged.
 
+- `/mcp`: a dual-era endpoint that serves any client without configuration. Each request's era is read from how it opens, never remembered: a request with the `_meta` envelope, or with a modern `MCP-Protocol-Version` header, is served as 2026-07-28, and everything else, `initialize` included, as 2025-11-25. Each era advertises only its own versions, so a modern client is never offered a legacy one to put in `_meta`.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

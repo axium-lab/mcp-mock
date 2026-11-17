@@ -1,0 +1,64 @@
+import express, { type Request, type Response, Router } from "express";
+import { parseJson } from "../../core/jsonrpc.ts";
+import { LEGACY_VERSIONS, serveLegacy } from "../2025-11-25/index.ts";
+import { hasClaim } from "../2026-07-28/envelope.ts";
+import { bodyErrorHandler, checkPostHeaders, methodNotAllowed, send } from "../2026-07-28/http.ts";
+import { MODERN_VERSIONS, serveModern } from "../2026-07-28/index.ts";
+import type { Endpoint } from "../types.ts";
+
+// /mcp serves every client, whatever era it speaks, the way the spec
+// describes a dual-era server: the era is read from how each request opens,
+// never remembered.
+//
+// - Modern: the request carries the per-request envelope (_meta with a
+//   protocol version), or its MCP-Protocol-Version header names a modern
+//   revision. Served statelessly as that revision; a modern header without
+//   the envelope is the modern leg's -32602 to give, not a reason to fall back.
+// - Legacy: everything else, initialize included. Served as the negotiated
+//   legacy revision.
+//
+// Each leg advertises only its own era's versions: a modern client told it
+// could use 2025-11-25 would retry with it in _meta, which no legacy revision
+// understands.
+function isModern(body: unknown, headerVersion: string | undefined): boolean {
+  if (headerVersion !== undefined && (MODERN_VERSIONS as readonly string[]).includes(headerVersion)) {
+    return true;
+  }
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return false;
+  const params = (body as { params?: unknown }).params;
+  return (
+    typeof params === "object" &&
+    params !== null &&
+    !Array.isArray(params) &&
+    hasClaim(params as Record<string, unknown>)
+  );
+}
+
+async function handlePost(req: Request, res: Response): Promise<void> {
+  const refused = checkPostHeaders(req);
+  if (refused) return send(res, refused);
+
+  const json = parseJson(typeof req.body === "string" ? req.body : "");
+  if (!json.ok) return send(res, { status: 400, body: json.response });
+
+  const headerVersion = req.get("mcp-protocol-version")?.trim();
+  if (isModern(json.value, headerVersion)) return serveModern(json.value, req, res);
+  return serveLegacy(json.value, req, res);
+}
+
+export const dualEraEndpoint: Endpoint = {
+  name: "dual-era",
+  mountPath: "",
+  revisions: [...MODERN_VERSIONS, ...LEGACY_VERSIONS],
+  createRouter() {
+    const router = Router();
+    router.use("/mcp", express.text({ type: () => true, limit: "4mb" }));
+    router.post("/mcp", (req, res, next) => {
+      handlePost(req, res).catch(next);
+    });
+    // Neither era has a GET stream or a session to end here.
+    router.all("/mcp", methodNotAllowed);
+    router.use("/mcp", bodyErrorHandler);
+    return router;
+  },
+};
