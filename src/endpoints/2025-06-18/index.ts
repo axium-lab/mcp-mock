@@ -16,6 +16,7 @@ export const PROFILE_2025_06_18: LegacyProfile = {
   batching: false,
   // Titles arrived in this revision.
   titles: true,
+  progressMessages: true,
 };
 
 export const endpoint20250618: Endpoint = {

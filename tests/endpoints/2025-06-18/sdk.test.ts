@@ -58,7 +58,7 @@ describe("2025-06-18 through the official SDK", () => {
   it("is reached by a dual-era client falling back to legacy", async () => {
     const client = await connectClient(url, { mode: "auto", supportedProtocolVersions: [REVISION] });
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(21);
+    expect(tools).toHaveLength(22);
     await client.close();
   });
 

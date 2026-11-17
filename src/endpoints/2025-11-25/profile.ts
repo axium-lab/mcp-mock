@@ -19,6 +19,9 @@ export interface LegacyProfile {
   // Whether resources, resource templates, prompts and prompt arguments have
   // a display `title`, which arrived in 2025-06-18.
   titles: boolean;
+  // Whether progress notifications carry a human-readable `message`, which
+  // arrived in 2025-03-26.
+  progressMessages: boolean;
   // The catalog in this revision's vocabulary, for revisions that predate
   // parts of it. Omitted when the catalog is served as it is.
   adaptDefinition?: (definition: ToolDefinition) => Record<string, unknown>;
@@ -31,6 +34,7 @@ export const PROFILE_2025_11_25: LegacyProfile = {
   unreadableId: "omit",
   batching: false,
   titles: true,
+  progressMessages: true,
 };
 
 export function shapeFor(profile: LegacyProfile) {

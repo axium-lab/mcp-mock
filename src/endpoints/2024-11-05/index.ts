@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import express, { type Request, type Response, Router } from "express";
 import { CONTROL, forcedStatus } from "../../core/control.ts";
 import { dispatch, parseJson, parseMessage } from "../../core/jsonrpc.ts";
+import { progressNotification, progressTokenOf } from "../../core/progress.ts";
+import type { Progress } from "../../tools/types.ts";
 import { PROFILE_2025_03_26 } from "../2025-03-26/index.ts";
 import { answerBatch, handlersFor, profileFor } from "../2025-11-25/index.ts";
 import type { LegacyProfile } from "../2025-11-25/profile.ts";
@@ -15,6 +17,8 @@ export const PROFILE_2024_11_05: LegacyProfile = {
   ...PROFILE_2025_03_26,
   revision: "2024-11-05",
   batching: false,
+  // Progress notifications had no message yet.
+  progressMessages: false,
   adaptDefinition: ({ name, description, inputSchema }) => ({ name, description, inputSchema }),
   adaptResult: ({ content, isError }) => ({
     content: content.filter((block) => block.type !== "resource_link" && (block.type as string) !== "audio"),
@@ -44,6 +48,8 @@ function sendForcedStatus(req: Request, res: Response): boolean {
 
 interface SseSession {
   stream: Response;
+  // Requests still running, so notifications/cancelled can abort them.
+  inflight: Map<string | number, AbortController>;
   // Set by initialize. Sessions are the one place a negotiated version can be
   // remembered, so it is: until then, the transport's own revision applies.
   profile?: LegacyProfile;
@@ -71,7 +77,7 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
       Connection: "keep-alive",
       "X-Accel-Buffering": "no",
     });
-    sessions.set(sessionId, { stream: res });
+    sessions.set(sessionId, { stream: res, inflight: new Map() });
     req.on("close", () => sessions.delete(sessionId));
     event(res, "endpoint", `${req.baseUrl}/messages?sessionId=${sessionId}`);
   });
@@ -110,16 +116,37 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
         return;
       }
 
-      if (parsed.kind === "request") {
-        if (parsed.message.method === "initialize") {
-          session.profile = profileFor(parsed.message, undefined, profiles);
-        }
-        const served = session.profile ?? native;
-        const response = await dispatch(parsed.message, handlersFor(served), {});
-        event(session.stream, "message", JSON.stringify(response));
-      }
-      // Notifications and responses are accepted and need no answer.
+      // Accepted before it is processed: the answer travels on the stream, and
+      // a slow request must not hold its POST open meanwhile.
       res.status(202).type("text/plain").send("Accepted");
+
+      // notifications/cancelled aborts the session's request it names, if it
+      // is still running; anything else unknown is ignored, as the spec says.
+      if (parsed.kind === "notification" && parsed.message.method === "notifications/cancelled") {
+        const requestId = parsed.message.params?.requestId;
+        if (typeof requestId === "string" || typeof requestId === "number") session.inflight.get(requestId)?.abort();
+        return;
+      }
+      if (parsed.kind !== "request") return;
+
+      if (parsed.message.method === "initialize") {
+        session.profile = profileFor(parsed.message, undefined, profiles);
+      }
+      const served = session.profile ?? native;
+      const { id } = parsed.message;
+      const cancel = new AbortController();
+      session.inflight.set(id, cancel);
+      const token = progressTokenOf(parsed.message.params);
+      const response = await dispatch(parsed.message, handlersFor(served), {
+        ...(token !== undefined && {
+          report: (update: Progress) =>
+            event(session.stream, "message", JSON.stringify(progressNotification(token, update, served.progressMessages))),
+        }),
+        signal: cancel.signal,
+      });
+      session.inflight.delete(id);
+      // A cancelled request gets no response.
+      if (!cancel.signal.aborted) event(session.stream, "message", JSON.stringify(response));
     })().catch(next);
   });
 

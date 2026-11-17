@@ -4,7 +4,7 @@ import { SERVER_INFO } from "../../core/server-info.ts";
 import { getPrompt, listPrompts } from "../../prompts/index.ts";
 import { listResources, listResourceTemplates, readResource } from "../../resources/index.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
-import { isInputRequired } from "../../tools/types.ts";
+import { isInputRequired, type Progress } from "../../tools/types.ts";
 import type { LegacyProfile } from "./profile.ts";
 
 // Resource not found, a code of the legacy revisions; 2026-07-28 replaced it
@@ -22,9 +22,17 @@ function withoutTitle<T extends { title?: string }>(definition: T): Omit<T, "tit
   return rest;
 }
 
+export interface LegacyContext {
+  // Set when the request carries a progress token.
+  report?: (progress: Progress) => void;
+  // Aborted when the request is cancelled: only on the 2024-11-05 SSE
+  // transport, whose session can pair a notifications/cancelled with it.
+  signal?: AbortSignal;
+}
+
 // The methods of a legacy revision. Results are plain objects: resultType,
 // cache hints and serverInfo in _meta only arrived with 2026-07-28.
-export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, never>> {
+export function legacyHandlers(profile: LegacyProfile): Handlers<LegacyContext> {
   const adaptDefinition = profile.adaptDefinition ?? ((definition) => ({ ...definition }));
   const adaptResult = profile.adaptResult ?? ((result) => ({ ...result }));
   const titled = <T extends { title?: string }>(definition: T) => (profile.titles ? definition : withoutTitle(definition));
@@ -64,8 +72,12 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<Record<string, 
 
       // No MRTR context: legacy revisions cannot carry an input request, so
       // tools complete without asking and input_required never comes back.
-      "tools/call": (params) => {
-        const result = callTool(params, { invalidArguments: profile.invalidArguments });
+      "tools/call": async (params, context) => {
+        const result = await callTool(params, {
+          invalidArguments: profile.invalidArguments,
+          ...(context.report && { report: context.report }),
+          ...(context.signal && { signal: context.signal }),
+        });
         if (isInputRequired(result)) throw new Error("input_required outside 2026-07-28");
         return adaptResult(result);
       },

@@ -44,6 +44,12 @@ export interface InputRequired {
   requestState?: string;
 }
 
+export interface Progress {
+  progress: number;
+  total?: number;
+  message?: string;
+}
+
 export interface CallContext {
   // Present only where the revision has MRTR. Absent, a tool must complete
   // without asking: legacy revisions cannot carry an input request.
@@ -52,6 +58,10 @@ export interface CallContext {
     inputResponses?: Record<string, unknown>;
     requestState?: string;
   };
+  // Present when the request asked for progress (a progressToken in _meta).
+  report?: (progress: Progress) => void;
+  // Aborted when the request is cancelled.
+  signal?: AbortSignal;
 }
 
 // MissingRequiredClientCapability, the 2026-07-28 error for a request that
@@ -60,8 +70,9 @@ export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32021;
 
 export interface Tool {
   definition: ToolDefinition;
-  // Receives arguments already validated against the input schema.
-  run(args: Args, context: CallContext): ToolResult | InputRequired;
+  // Receives arguments already validated against the input schema. Only
+  // tools that take time (simulate_work) answer asynchronously.
+  run(args: Args, context: CallContext): ToolResult | InputRequired | Promise<ToolResult>;
 }
 
 export function isInputRequired(result: ToolResult | InputRequired): result is InputRequired {

@@ -278,6 +278,28 @@ exports[`catalog over 2024-11-05 lists the whole catalog 1`] = `
     "name": "color_swatch",
   },
   {
+    "description": "Works through a number of steps, waiting between them, and reports progress on each when the request asks for it. Use it to test progress notifications, timeouts and cancellation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "step_ms": {
+          "description": "Milliseconds each step takes. Defaults to 100.",
+          "maximum": 2000,
+          "minimum": 0,
+          "type": "integer",
+        },
+        "steps": {
+          "description": "How many steps. Defaults to 5.",
+          "maximum": 20,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "name": "simulate_work",
+  },
+  {
     "description": "Gets the current weather for a city. Fake but stable: the same city always reports the same weather. "Atlantis" is never found.",
     "inputSchema": {
       "additionalProperties": false,
@@ -634,6 +656,17 @@ exports[`catalog over 2024-11-05 calls color_swatch 1`] = `
       "data": "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAGUlEQVR4AQEOAPH/AP+IAP+IAAD/iAD/iAAuzgYd3WBI5wAAAABJRU5ErkJggg==",
       "mimeType": "image/png",
       "type": "image",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2024-11-05 calls simulate_work 1`] = `
+{
+  "content": [
+    {
+      "text": "{"steps":2,"completed":true}",
+      "type": "text",
     },
   ],
 }
@@ -1234,6 +1267,50 @@ exports[`catalog over 2026-07-28 lists the whole catalog 1`] = `
     },
     "name": "color_swatch",
     "title": "Colour swatch",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Works through a number of steps, waiting between them, and reports progress on each when the request asks for it. Use it to test progress notifications, timeouts and cancellation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "step_ms": {
+          "description": "Milliseconds each step takes. Defaults to 100.",
+          "maximum": 2000,
+          "minimum": 0,
+          "type": "integer",
+        },
+        "steps": {
+          "description": "How many steps. Defaults to 5.",
+          "maximum": 20,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "name": "simulate_work",
+    "outputSchema": {
+      "properties": {
+        "completed": {
+          "type": "boolean",
+        },
+        "steps": {
+          "type": "integer",
+        },
+      },
+      "required": [
+        "steps",
+        "completed",
+      ],
+      "type": "object",
+    },
+    "title": "Simulate work",
   },
   {
     "annotations": {
@@ -2042,6 +2119,22 @@ exports[`catalog over 2026-07-28 calls color_swatch 1`] = `
 }
 `;
 
+exports[`catalog over 2026-07-28 calls simulate_work 1`] = `
+{
+  "content": [
+    {
+      "text": "{"steps":2,"completed":true}",
+      "type": "text",
+    },
+  ],
+  "resultType": "complete",
+  "structuredContent": {
+    "completed": true,
+    "steps": 2,
+  },
+}
+`;
+
 exports[`catalog over 2026-07-28 calls get_weather 1`] = `
 {
   "content": [
@@ -2741,6 +2834,50 @@ exports[`catalog over 2025-11-25 lists the whole catalog 1`] = `
     },
     "name": "color_swatch",
     "title": "Colour swatch",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Works through a number of steps, waiting between them, and reports progress on each when the request asks for it. Use it to test progress notifications, timeouts and cancellation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "step_ms": {
+          "description": "Milliseconds each step takes. Defaults to 100.",
+          "maximum": 2000,
+          "minimum": 0,
+          "type": "integer",
+        },
+        "steps": {
+          "description": "How many steps. Defaults to 5.",
+          "maximum": 20,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "name": "simulate_work",
+    "outputSchema": {
+      "properties": {
+        "completed": {
+          "type": "boolean",
+        },
+        "steps": {
+          "type": "integer",
+        },
+      },
+      "required": [
+        "steps",
+        "completed",
+      ],
+      "type": "object",
+    },
+    "title": "Simulate work",
   },
   {
     "annotations": {
@@ -3539,6 +3676,21 @@ exports[`catalog over 2025-11-25 calls color_swatch 1`] = `
 }
 `;
 
+exports[`catalog over 2025-11-25 calls simulate_work 1`] = `
+{
+  "content": [
+    {
+      "text": "{"steps":2,"completed":true}",
+      "type": "text",
+    },
+  ],
+  "structuredContent": {
+    "completed": true,
+    "steps": 2,
+  },
+}
+`;
+
 exports[`catalog over 2025-11-25 calls get_weather 1`] = `
 {
   "content": [
@@ -4243,6 +4395,50 @@ exports[`catalog over 2025-06-18 lists the whole catalog 1`] = `
     },
     "name": "color_swatch",
     "title": "Colour swatch",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+    },
+    "description": "Works through a number of steps, waiting between them, and reports progress on each when the request asks for it. Use it to test progress notifications, timeouts and cancellation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "step_ms": {
+          "description": "Milliseconds each step takes. Defaults to 100.",
+          "maximum": 2000,
+          "minimum": 0,
+          "type": "integer",
+        },
+        "steps": {
+          "description": "How many steps. Defaults to 5.",
+          "maximum": 20,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "name": "simulate_work",
+    "outputSchema": {
+      "properties": {
+        "completed": {
+          "type": "boolean",
+        },
+        "steps": {
+          "type": "integer",
+        },
+      },
+      "required": [
+        "steps",
+        "completed",
+      ],
+      "type": "object",
+    },
+    "title": "Simulate work",
   },
   {
     "annotations": {
@@ -5041,6 +5237,21 @@ exports[`catalog over 2025-06-18 calls color_swatch 1`] = `
 }
 `;
 
+exports[`catalog over 2025-06-18 calls simulate_work 1`] = `
+{
+  "content": [
+    {
+      "text": "{"steps":2,"completed":true}",
+      "type": "text",
+    },
+  ],
+  "structuredContent": {
+    "completed": true,
+    "steps": 2,
+  },
+}
+`;
+
 exports[`catalog over 2025-06-18 calls get_weather 1`] = `
 {
   "content": [
@@ -5634,6 +5845,35 @@ exports[`catalog over 2025-03-26 lists the whole catalog 1`] = `
     "annotations": {
       "destructiveHint": false,
       "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true,
+      "title": "Simulate work",
+    },
+    "description": "Works through a number of steps, waiting between them, and reports progress on each when the request asks for it. Use it to test progress notifications, timeouts and cancellation.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "step_ms": {
+          "description": "Milliseconds each step takes. Defaults to 100.",
+          "maximum": 2000,
+          "minimum": 0,
+          "type": "integer",
+        },
+        "steps": {
+          "description": "How many steps. Defaults to 5.",
+          "maximum": 20,
+          "minimum": 1,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "name": "simulate_work",
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
       "openWorldHint": true,
       "readOnlyHint": true,
       "title": "Current weather",
@@ -6064,6 +6304,17 @@ exports[`catalog over 2025-03-26 calls color_swatch 1`] = `
       "data": "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAGUlEQVR4AQEOAPH/AP+IAP+IAAD/iAD/iAAuzgYd3WBI5wAAAABJRU5ErkJggg==",
       "mimeType": "image/png",
       "type": "image",
+    },
+  ],
+}
+`;
+
+exports[`catalog over 2025-03-26 calls simulate_work 1`] = `
+{
+  "content": [
+    {
+      "text": "{"steps":2,"completed":true}",
+      "type": "text",
     },
   ],
 }

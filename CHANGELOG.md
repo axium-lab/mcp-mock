@@ -50,6 +50,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - `prompts/list` and `prompts/get` serve `summarize`, `code_review` and `weather_report`, the last one with the city's weather embedded as a resource. Unknown prompts and missing, unknown or non-string arguments are `-32602`.
   - On 2026-07-28 the list results and `resources/read` carry cache hints, and `resources/read` and `prompts/get` require the `Mcp-Name` header. Before 2025-06-18, display titles are left out.
 
+- Progress and cancellation, with a 22nd tool, `simulate_work`, that really waits between steps:
+  - A request with `_meta.progressToken` gets `notifications/progress` for each step ("Step 2 of 5"), then its result. On Streamable HTTP the response turns into an SSE stream only once there is progress to send, so a request that reports none, or an error tied to an HTTP status such as `-32021`, still gets a plain JSON response. On the 2024-11-05 transport the notifications travel on the session stream, and they carry no `message`, which that revision did not have.
+  - On 2026-07-28, closing the response stream cancels the request: the server stops and sends nothing more. On the 2024-11-05 transport, `notifications/cancelled` cancels a running request of the same session, which is never answered. On the legacy Streamable HTTP revisions, without sessions to pair it with a request, `notifications/cancelled` is accepted and ignored, as the spec allows, and a dropped connection is not taken as a cancellation, as those revisions require.
+
 ### Fixed
 
 - JSON-RPC errors whose request id cannot be read omit `id` instead of sending `id: null`, which no MCP schema allows.

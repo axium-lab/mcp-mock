@@ -7,6 +7,7 @@ import { convertUnits } from "./calc/convert-units.ts";
 import { dateDiff } from "./calc/date-diff.ts";
 import { echo } from "./calc/echo.ts";
 import { hashText } from "./calc/hash-text.ts";
+import { simulateWork } from "./calc/simulate-work.ts";
 import { sortList } from "./calc/sort-list.ts";
 import { textStats } from "./calc/text-stats.ts";
 import { transformText } from "./calc/transform-text.ts";
@@ -41,6 +42,7 @@ const TOOLS: readonly Tool[] = [
   hashText,
   dateDiff,
   colorSwatch,
+  simulateWork,
   getWeather,
   getForecast,
   searchWeb,
@@ -70,6 +72,9 @@ export interface CallOptions {
   // Set by revisions with multi round-trip requests (2026-07-28): what a tool
   // needs to ask the client for input and read its answers.
   mrtr?: CallContext["mrtr"];
+  // Progress reporting and cancellation, when the transport can carry them.
+  report?: CallContext["report"];
+  signal?: CallContext["signal"];
 }
 
 // tools/call. Protocol errors (thrown) for a request the model cannot fix:
@@ -78,7 +83,7 @@ export interface CallOptions {
 export function callTool(
   params: Record<string, unknown> | undefined,
   options: CallOptions = {},
-): ToolResult | InputRequired {
+): ToolResult | InputRequired | Promise<ToolResult> {
   const name = params?.name;
   if (typeof name !== "string") {
     throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "name" must be a string');
@@ -127,7 +132,11 @@ export function callTool(
     }
     return { content: [{ type: "text", text: message }], isError: true };
   }
-  return tool.run(args, options.mrtr ? { mrtr: options.mrtr } : {});
+  return tool.run(args, {
+    ...(options.mrtr && { mrtr: options.mrtr }),
+    ...(options.report && { report: options.report }),
+    ...(options.signal && { signal: options.signal }),
+  });
 }
 
 // The mock never paginates, so it never issues a cursor: any cursor a client

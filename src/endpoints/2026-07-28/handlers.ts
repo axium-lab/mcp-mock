@@ -4,7 +4,7 @@ import { SERVER_INFO } from "../../core/server-info.ts";
 import { getPrompt, listPrompts } from "../../prompts/index.ts";
 import { listResources, listResourceTemplates, readResource } from "../../resources/index.ts";
 import { callTool, checkNoCursor, listTools } from "../../tools/index.ts";
-import { isInputRequired } from "../../tools/types.ts";
+import { isInputRequired, type Progress } from "../../tools/types.ts";
 import { META } from "./envelope.ts";
 
 export const REVISION = "2026-07-28";
@@ -16,6 +16,11 @@ const CACHE_HINTS = { ttlMs: 3_600_000, cacheScope: "public" } as const;
 
 export interface RequestContext {
   protocolVersion: string;
+  // Set when the request carries a progress token.
+  report?: (progress: Progress) => void;
+  // Aborted when the client closes the response stream, which cancels the
+  // request in this revision.
+  signal?: AbortSignal;
 }
 
 // Every result is a "complete" one (no MRTR yet) and names the server in its
@@ -65,9 +70,9 @@ export const handlers: Handlers<RequestContext> = withControl({
     // tools/call may answer input_required (MRTR): the tool asks the client
     // for input and the client retries with its answers. Such an interim
     // result is not "complete" and carries no cache hints.
-    "tools/call": (params) => {
+    "tools/call": async (params, context) => {
       const meta = (params?._meta ?? {}) as Record<string, unknown>;
-      const result = callTool(params, {
+      const result = await callTool(params, {
         mrtr: {
           clientCapabilities: (meta[META.clientCapabilities] ?? {}) as Record<string, unknown>,
           ...(params?.inputResponses !== undefined && {
@@ -75,6 +80,8 @@ export const handlers: Handlers<RequestContext> = withControl({
           }),
           ...(typeof params?.requestState === "string" && { requestState: params.requestState }),
         },
+        ...(context.report && { report: context.report }),
+        ...(context.signal && { signal: context.signal }),
       });
       if (isInputRequired(result)) {
         return { ...result, _meta: { [META.serverInfo]: SERVER_INFO } };

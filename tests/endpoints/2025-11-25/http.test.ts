@@ -115,7 +115,7 @@ describe("2025-11-25 over raw HTTP", () => {
     it("serves requests without a prior initialize, having no session to tie them to", async () => {
       const reply = await post(request("tools/list"));
       expect(reply.status).toBe(200);
-      expect(reply.body.result.tools).toHaveLength(21);
+      expect(reply.body.result.tools).toHaveLength(22);
     });
   });
 

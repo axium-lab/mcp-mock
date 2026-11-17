@@ -63,6 +63,57 @@ export function sendForcedStatus(req: Request, res: Response, shape: ErrorShape 
   return true;
 }
 
+export interface Responder {
+  // Sends a request-scoped notification (progress), switching the response
+  // to an SSE stream on the first one.
+  notify(message: unknown): void;
+  // Sends the final response: as the last SSE event if streaming started,
+  // otherwise as a plain JSON body with the given status.
+  finish(status: number, body: unknown): void;
+  // Aborted if the client closes the connection before the response ends.
+  signal: AbortSignal;
+}
+
+// One response per request, JSON or SSE, decided late: the stream only
+// starts if there is something to send before the result. Until then the
+// status code stays free, so an error that the spec ties to an HTTP status
+// (e.g. -32021 → 400) still gets it.
+export function responder(res: Response): Responder {
+  const aborted = new AbortController();
+  let streaming = false;
+  let done = false;
+  res.on("close", () => {
+    if (!done) aborted.abort();
+  });
+  const event = (message: unknown) => res.write(`event: message\ndata: ${JSON.stringify(message)}\n\n`);
+  return {
+    signal: aborted.signal,
+    notify(message) {
+      if (done || aborted.signal.aborted) return;
+      if (!streaming) {
+        streaming = true;
+        res.writeHead(200, {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache, no-transform",
+          Connection: "keep-alive",
+          "X-Accel-Buffering": "no",
+        });
+      }
+      event(message);
+    },
+    finish(status, body) {
+      if (done || aborted.signal.aborted) return;
+      done = true;
+      if (streaming) {
+        event(body);
+        res.end();
+      } else {
+        res.status(status).json(body);
+      }
+    },
+  };
+}
+
 export function methodNotAllowedWith(shape: ErrorShape) {
   return (_req: Request, res: Response): void => {
     res.setHeader("Allow", "POST");

@@ -17,9 +17,9 @@ describe.each(listTools().map((tool) => [tool.name, tool] as const))("%s", (name
     if (output) expect(() => ajv.compile(output)).not.toThrow();
   });
 
-  it("returns structured content that matches its output schema", () => {
+  it("returns structured content that matches its output schema", async () => {
     // Without an MRTR context every tool completes, delete_file included.
-    const result = callTool({ name, arguments: SAMPLES[name] }) as ToolResult;
+    const result = (await callTool({ name, arguments: SAMPLES[name] })) as ToolResult;
     expect(result.isError).toBeUndefined();
     if (tool.outputSchema) {
       const validate = ajv.compile(tool.outputSchema);

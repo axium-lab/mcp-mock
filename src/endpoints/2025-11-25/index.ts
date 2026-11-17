@@ -12,9 +12,12 @@ import {
   bodyErrorHandlerWith,
   checkPostHeaders,
   methodNotAllowedWith,
+  responder,
   send,
   sendForcedStatus,
 } from "../2026-07-28/http.ts";
+import { progressNotification, progressTokenOf } from "../../core/progress.ts";
+import type { Progress } from "../../tools/types.ts";
 import type { Endpoint } from "../types.ts";
 import { legacyHandlers } from "./handlers.ts";
 import { type LegacyProfile, PROFILE_2025_11_25, shapeFor } from "./profile.ts";
@@ -164,17 +167,29 @@ export async function serveLegacy(
   const profile = profileFor(message, headerVersion, profiles);
   if (!profile) return send(res, unsupportedHeader(headerVersion as string, profiles), early);
 
-  // Notifications (initialized, cancelled) and responses to server requests
-  // (the mock sends none) are accepted and dropped.
+  // Notifications and responses to server requests (the mock sends none) are
+  // accepted and dropped. That includes notifications/cancelled: it arrives
+  // in a POST of its own, and without sessions nothing pairs it with the
+  // request it names, which the spec allows a server to ignore ("the request
+  // cannot be cancelled").
   if (parsed.kind !== "request") {
     res.status(202).end();
     return;
   }
 
+  // Progress, when asked for, streams over SSE before the result. A dropped
+  // connection is not a cancellation in these revisions, so the request is
+  // not aborted; its answer simply has nowhere to go.
+  const reply = responder(res);
+  const token = progressTokenOf(parsed.message.params);
+  const response = await dispatch(parsed.message, handlersFor(profile), {
+    ...(token !== undefined && {
+      report: (update: Progress) => reply.notify(progressNotification(token, update, profile.progressMessages)),
+    }),
+  });
   // Every JSON-RPC error, unknown methods included, travels in-band: legacy
   // revisions tie no HTTP status to them.
-  const response = await dispatch(parsed.message, handlersFor(profile), {});
-  res.status(200).json(response);
+  reply.finish(200, response);
 }
 
 // The router of a pinned legacy endpoint (one profile). 2025-06-18 and older
