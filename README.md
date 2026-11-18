@@ -1,6 +1,11 @@
+![mcp-mock: test your MCP integrations without real services](.github/assets/banner.png)
+
 # mcp-mock
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Public instance](https://img.shields.io/website?url=https%3A%2F%2Fpublic.mcp-mock.com%2Fhealth&label=public%20instance&up_message=online&down_message=offline)](https://public.mcp-mock.com/health)
+[![MCP spec](https://img.shields.io/badge/MCP%20spec-2024--11--05%20%E2%86%92%202026--07--28-e5484d)](https://modelcontextprotocol.io/specification)
+[![Release](https://img.shields.io/github/v/release/axium-lab/mcp-mock)](https://github.com/axium-lab/mcp-mock/releases)
 
 **A mock MCP server for integration tests. Point your MCP client at it, keep your code.**
 
