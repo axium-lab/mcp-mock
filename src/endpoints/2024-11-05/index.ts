@@ -60,6 +60,7 @@ interface SseSession {
 }
 
 function event(stream: Response, name: string, data: string): void {
+  if (stream.writableEnded || stream.destroyed) return;
   stream.write(`event: ${name}\ndata: ${data}\n\n`);
 }
 
@@ -130,6 +131,8 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
     const session: SseSession = { stream: res, inflight: new Map(), subscriptions: new Map() };
     sessions.set(sessionId, session);
     req.on("close", () => {
+      for (const cancel of session.inflight.values()) cancel.abort();
+      session.inflight.clear();
       for (const uri of [...session.subscriptions.keys()]) stopUpdates(session, uri);
       sessions.delete(sessionId);
     });
@@ -154,7 +157,12 @@ export function sseRouter(profiles: readonly LegacyProfile[]): Router {
       const json = parseJson(typeof req.body === "string" ? req.body : "");
       const profile = session.profile ?? native;
       if (json.ok && Array.isArray(json.value) && profile.batching) {
-        const outcome = await answerBatch(json.value, profile);
+        const base = handlersFor(profile);
+        const merged: Handlers<LegacyContext> = {
+          ...base,
+          requests: { ...base.requests, ...subscriptionHandlers(session).requests },
+        };
+        const outcome = await answerBatch(json.value, profile, merged);
         if (outcome.kind === "refused") {
           res.status(400).type("text/plain").send(`Invalid message: ${outcome.rejection.body.error.message}`);
           return;

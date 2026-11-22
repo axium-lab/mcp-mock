@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- `/.well-known/openid-configuration` now includes `jwks_uri` (served at `/oauth/jwks`), `subject_types_supported` and `id_token_signing_alg_values_supported`, matching OpenID Connect Discovery 1.0 and passing the official SDK's `OpenIdProviderDiscoveryMetadataSchema`.
+- Dual-era `/mcp` now rejects a JSON-RPC batch containing a modern-enveloped (`2026-07-28`) element with `400` / `-32600` instead of falling back to `2025-03-26`.
+- `resources/read` now treats malformed percent-encoding in `weather://` and `user://` URIs as a missing resource (`-32002` legacy / `-32602` on `2026-07-28`) instead of `-32603 Internal error`.
+- Tasks extension (`2026-07-28`): `simulate_work` validates its arguments before minting a task (returning an `isError` result synchronously on invalid bounds), and `decodeTask` rejects negative durations or out-of-range timestamps as `-32602` instead of `-32603 Invalid Date`.
+- `subscriptions/listen` now rejects malformed `_meta["com.mcp-mock/error"]` values with `-32602` instead of ignoring them and opening a stream.
+- `Mcp-Name` Base64 sentinel decoding now rejects invalid UTF-8 byte sequences with `400` / `-32020`.
+- Legacy `initialize` now requires string `name` and `version` in `clientInfo`, and the `2024-11-05` SSE transport aborts in-flight requests on stream close and routes `resources/subscribe` / `resources/unsubscribe` inside `2025-03-26` batches on `/sse`.
+
 ## [0.1.0] - 2026-11-17
 
 First release.

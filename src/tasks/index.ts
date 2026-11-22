@@ -35,6 +35,10 @@ export function encodeTask(record: TaskRecord): string {
   return PREFIX + Buffer.from(JSON.stringify(record)).toString("base64url");
 }
 
+function isValidTimestamp(ms: unknown): ms is number {
+  return typeof ms === "number" && Number.isSafeInteger(ms) && !Number.isNaN(new Date(ms).getTime());
+}
+
 // The record behind a task id. Anything that does not decode to one is an
 // unknown task, which the extension answers with Invalid Params. A forged id
 // can only describe a tool call the caller could make directly.
@@ -44,10 +48,13 @@ export function decodeTask(taskId: unknown): TaskRecord {
   try {
     const record = JSON.parse(Buffer.from(taskId.slice(PREFIX.length), "base64url").toString("utf8")) as TaskRecord;
     if (
-      typeof record.params !== "object" ||
+      typeof record?.params !== "object" ||
       record.params === null ||
-      !Number.isFinite(record.startedAt) ||
-      !Number.isFinite(record.durationMs)
+      Array.isArray(record.params) ||
+      !isValidTimestamp(record.startedAt) ||
+      !Number.isSafeInteger(record.durationMs) ||
+      record.durationMs < 0 ||
+      !isValidTimestamp(record.startedAt + record.durationMs)
     ) {
       throw unknown();
     }

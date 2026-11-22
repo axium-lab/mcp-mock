@@ -1,6 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { createHash, randomBytes } from "node:crypto";
-import { Client, StreamableHTTPClientTransport, UnauthorizedError } from "@modelcontextprotocol/client";
+import {
+  Client,
+  discoverAuthorizationServerMetadata,
+  StreamableHTTPClientTransport,
+  UnauthorizedError,
+} from "@modelcontextprotocol/client";
 import { type RunningServer, startServer, stopServer } from "../server.ts";
 
 // OAuth on the protected endpoints: the official SDK runs the whole flow
@@ -167,6 +172,24 @@ describe("OAuth on /protected", () => {
         client_id_metadata_document_supported: true,
         authorization_response_iss_parameter_supported: true,
       });
+    });
+
+    it("passes the SDK's OpenID Connect discovery validation and serves jwks_uri", async () => {
+      const discovered = await discoverAuthorizationServerMetadata(running.origin, {
+        fetchFn: (input, init) =>
+          String(input).includes("/.well-known/oauth-authorization-server")
+            ? Promise.resolve(new Response("not found", { status: 404 }))
+            : fetch(input, init),
+      });
+      expect(discovered).toMatchObject({
+        issuer: running.origin,
+        jwks_uri: `${running.origin}/oauth/jwks`,
+        subject_types_supported: ["public"],
+        id_token_signing_alg_values_supported: ["RS256"],
+      });
+      const jwks = await fetch(`${running.origin}/oauth/jwks`);
+      expect(jwks.status).toBe(200);
+      expect(await jwks.json()).toEqual({ keys: [] });
     });
 
     it("issues a token that opens the protected endpoint it was issued for, and only that one", async () => {

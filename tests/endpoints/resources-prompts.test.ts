@@ -105,7 +105,15 @@ describe("resources and prompts", () => {
       return { status: res.status, body: (await res.json()) as any };
     }
 
-    it.each([["file:///missing"], ["weather://Atlantis"], ["user://missing"], ["ftp://example.com/x"], ["file:///a/../etc/passwd"]])(
+    it.each([
+      ["file:///missing"],
+      ["weather://Atlantis"],
+      ["weather://%E0%A4%A"],
+      ["user://missing"],
+      ["user://%ZZ"],
+      ["ftp://example.com/x"],
+      ["file:///a/../etc/passwd"],
+    ])(
       "answers %s with resource-not-found: -32002 on legacy, -32602 on 2026-07-28",
       async (uri) => {
         const legacy = await rpc("/2025-11-25/mcp", "resources/read", { uri });

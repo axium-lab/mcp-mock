@@ -49,11 +49,13 @@ export function legacyHandlers(profile: LegacyProfile): Handlers<LegacyContext> 
         if (
           typeof params?.protocolVersion !== "string" ||
           !isObject(params.capabilities) ||
-          !isObject(params.clientInfo)
+          !isObject(params.clientInfo) ||
+          typeof params.clientInfo.name !== "string" ||
+          typeof params.clientInfo.version !== "string"
         ) {
           throw new JsonRpcError(
             ErrorCode.InvalidParams,
-            'Invalid params: initialize requires "protocolVersion", "capabilities" and "clientInfo"',
+            'Invalid params: initialize requires "protocolVersion", "capabilities" and "clientInfo" with string "name" and "version"',
           );
         }
         return {

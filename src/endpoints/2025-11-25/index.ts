@@ -3,6 +3,7 @@ import {
   dispatch,
   ErrorCode,
   errorResponse,
+  type Handlers,
   type JsonRpcResponse,
   parseJson,
   parseMessage,
@@ -19,7 +20,7 @@ import {
 import { progressNotification, progressTokenOf } from "../../core/progress.ts";
 import type { Progress } from "../../tools/types.ts";
 import type { Endpoint } from "../types.ts";
-import { legacyHandlers } from "./handlers.ts";
+import { type LegacyContext, legacyHandlers } from "./handlers.ts";
 import { type LegacyProfile, PROFILE_2025_11_25, shapeFor } from "./profile.ts";
 
 // Legacy Streamable HTTP (2025-03-26 to 2025-11-25), served without sessions.
@@ -87,7 +88,11 @@ export type BatchOutcome =
 // element gets its error in the response array without failing the others.
 // Transport-neutral, so the 2024-11-05 SSE transport can deliver the answers
 // on its stream.
-export async function answerBatch(batch: unknown[], profile: LegacyProfile): Promise<BatchOutcome> {
+export async function answerBatch(
+  batch: unknown[],
+  profile: LegacyProfile,
+  handlers: Handlers<LegacyContext> = handlersFor(profile),
+): Promise<BatchOutcome> {
   const shape = shapeFor(profile);
   const refused = (message: string): BatchOutcome => {
     const rejection = reject(400, undefined, ErrorCode.InvalidRequest, `Invalid Request: ${message}`);
@@ -111,7 +116,7 @@ export async function answerBatch(batch: unknown[], profile: LegacyProfile): Pro
         errorResponse(element.message.id, ErrorCode.InvalidRequest, "Invalid Request: initialize must not be part of a JSON-RPC batch"),
       );
     } else if (element.kind === "request") {
-      answers.push((await dispatch(element.message, handlersFor(profile), {})) as JsonRpcResponse);
+      answers.push((await dispatch(element.message, handlers, {})) as JsonRpcResponse);
     }
     // Notifications are accepted and get no answer.
   }

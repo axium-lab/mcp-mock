@@ -36,18 +36,25 @@ const LEGACY_PROFILES = [PROFILE_2025_11_25, PROFILE_2025_06_18, PROFILE_2025_03
 // Each leg advertises only its own era's versions: a modern client told it
 // could use 2025-11-25 would retry with it in _meta, which no legacy revision
 // understands.
-function isModern(body: unknown, headerVersion: string | undefined): boolean {
-  if (headerVersion !== undefined && (MODERN_VERSIONS as readonly string[]).includes(headerVersion)) {
-    return true;
-  }
-  if (typeof body !== "object" || body === null || Array.isArray(body)) return false;
-  const params = (body as { params?: unknown }).params;
+function hasModernEnvelope(value: unknown): boolean {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const params = (value as { params?: unknown }).params;
   return (
     typeof params === "object" &&
     params !== null &&
     !Array.isArray(params) &&
     hasClaim(params as Record<string, unknown>)
   );
+}
+
+function isModern(body: unknown, headerVersion: string | undefined): boolean {
+  if (headerVersion !== undefined && (MODERN_VERSIONS as readonly string[]).includes(headerVersion)) {
+    return true;
+  }
+  // A batch carrying any modern-enveloped element belongs to the modern leg
+  // (which rejects batches) rather than silently falling back to 2025-03-26.
+  if (Array.isArray(body)) return body.some(hasModernEnvelope);
+  return hasModernEnvelope(body);
 }
 
 // Errors raised before the body says which era it is (transport refusals,

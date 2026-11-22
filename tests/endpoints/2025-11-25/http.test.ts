@@ -95,6 +95,16 @@ describe("2025-11-25 over raw HTTP", () => {
       expectValid(reply);
     });
 
+    it("rejects initialize with malformed clientInfo, in-band", async () => {
+      const reply = await post({
+        ...INITIALIZE,
+        params: { protocolVersion: REVISION, capabilities: {}, clientInfo: { name: "tests" } },
+      });
+      expect(reply.status).toBe(200);
+      expect(reply.body.error.code).toBe(-32602);
+      expectValid(reply);
+    });
+
     it("accepts the initialized notification with 202", async () => {
       const reply = await post({ jsonrpc: "2.0", method: "notifications/initialized" });
       expect(reply.status).toBe(202);
