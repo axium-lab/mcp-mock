@@ -71,6 +71,8 @@ nav.main a {
 }
 nav.main a:hover { color: var(--fg); background: var(--surface-2); }
 nav.main a.active { color: var(--fg); }
+nav.main a { white-space: nowrap; }
+nav.main .arr { font-family: var(--font-mono); font-weight: 400; font-size: 13px; color: var(--faint); }
 .head-ctas { display: flex; gap: 10px; }
 
 /* ---------- buttons ---------- */
@@ -275,6 +277,8 @@ footer.site .foot-legal a { color: var(--muted); }
   .logo img { height: 22px; }
   .logo .by { display: none; }
   nav.main a { padding: 8px 10px; }
+  nav.main { gap: 0; }
+  nav.main .arr { display: none; }
   .head-ctas { display: none; }
   .page-hero, .page-hero.home { padding-block: 56px 48px; }
   section.block { padding-block: 48px; }
