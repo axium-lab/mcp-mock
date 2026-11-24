@@ -6,8 +6,8 @@
 <title>OAuth — mcp-mock</title>
 <meta name="description" content="OAuth in mcp-mock: every endpoint served again under /protected/ behind a bearer token, with its own stateless authorization server — Protected Resource Metadata, PKCE, refresh tokens, Dynamic Client Registration and switches to provoke failures." />
 <link rel="canonical" href="https://mcp-mock.com/api-oauth.html" />
-<meta name="theme-color" content="#0b0e14" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%235b7cfa'/><text x='16' y='23' font-family='monospace' font-size='16' font-weight='700' fill='%23ffffff' text-anchor='middle'>{}</text></svg>" />
+<meta name="theme-color" content="#0e091d" />
+<link rel="icon" type="image/svg+xml" href="assets/axium-isotipo.svg" />
 
 <!-- Open Graph / social -->
 <meta property="og:type" content="article" />
@@ -52,20 +52,22 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="wrap">
-  <nav>
-    <div class="brand"><a href="index.html">mcp<span>-</span>mock</a></div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a class="active" href="api.html">Docs</a>
-      <a class="gh" href="https://github.com/axium-lab/mcp-mock">GitHub ↗</a>
-    </div>
-  </nav>
-</div>
-
-<header>
+<header class="site-header">
   <div class="wrap">
-    <span class="eyebrow"><a href="api.html">Docs</a> / OAuth</span>
+    <a class="logo" href="index.html"><img src="assets/axium-isotipo.svg" alt="" width="25" height="28" />mcp-mock<span class="by">by axium</span></a>
+    <nav class="main" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a class="active" aria-current="page" href="api.html">Docs</a>
+    </nav>
+    <div class="head-ctas">
+      <a class="btn sm" href="https://github.com/axium-lab/mcp-mock">GitHub <span class="arr">↗</span></a>
+    </div>
+  </div>
+</header>
+
+<header class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow"><a href="api.html">Docs</a><span class="path">/ OAuth</span></span>
     <h1>OAuth</h1>
     <p class="sub">
       Authorization is opt-in by URL: everything under <code>/protected/</code> requires a bearer token, and
@@ -224,14 +226,18 @@ Location: http://localhost:8080/callback?code=mcpmock_code.…&amp;state=xyz&amp
 </div>
 </div>
 
-<footer>
+<footer class="site">
   <div class="wrap">
-    <div>Built by <a class="footer-brand" href="https://axium-lab.com">Axium</a> — the Zero Trust AI gateway.</div>
-    <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="api.html">Docs</a>
-      <a href="https://github.com/axium-lab/mcp-mock">GitHub</a>
-      <a href="https://github.com/axium-lab/mcp-mock/pkgs/container/mcp-mock">Docker</a>
+    <a class="logo" href="https://axium-lab.com"><img src="assets/axium-logo.svg" alt="Axium" width="100" height="26" /></a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="api.html">Docs</a></li>
+      <li><a href="https://github.com/axium-lab/mcp-mock">GitHub</a></li>
+      <li><a href="https://github.com/axium-lab/mcp-mock/pkgs/container/mcp-mock">Docker</a></li>
+      <li><a href="https://github.com/axium-lab/mcp-mock/blob/main/CHANGELOG.md">Changelog</a></li>
+    </ul>
+    <div class="foot-legal">
+      <span>Built by <a href="https://axium-lab.com">Axium</a> — the Zero Trust AI gateway.</span>
       <a href="https://github.com/axium-lab/mcp-mock/blob/main/LICENSE">MIT License</a>
     </div>
   </div>
