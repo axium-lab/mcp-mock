@@ -8,8 +8,10 @@ import {
   type TaskRecord,
   taskFields,
 } from "../../tasks/index.ts";
+import { simulateWork } from "../../tools/calc/simulate-work.ts";
 import { callTool } from "../../tools/index.ts";
 import { isInputRequired, MISSING_REQUIRED_CLIENT_CAPABILITY } from "../../tools/types.ts";
+import { validateArgs } from "../../tools/validate.ts";
 import { META } from "./envelope.ts";
 import { complete, SERVER_META } from "./results.ts";
 
@@ -59,6 +61,13 @@ export function taskDuration(params: Record<string, unknown> | undefined): numbe
   }
   if (!declared || params?.name !== "simulate_work") return undefined;
   const args = isObject(params.arguments) ? params.arguments : {};
+  // Invalid arguments are answered synchronously (unless a result is forced,
+  // which skips argument validation) rather than minting a task with negative
+  // or out-of-range duration.
+  if (!(CONTROL.response in meta)) {
+    if (params.arguments !== undefined && !isObject(params.arguments)) return undefined;
+    if (validateArgs(args, simulateWork.definition.inputSchema) !== undefined) return undefined;
+  }
   const steps = Number.isInteger(args.steps) ? (args.steps as number) : 5;
   const stepMs = Number.isInteger(args.step_ms) ? (args.step_ms as number) : 100;
   return steps * stepMs;

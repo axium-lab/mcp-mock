@@ -132,6 +132,14 @@ describe("change notifications", () => {
       expect(((await res.json()) as { error: unknown }).error).toEqual({ code: -32603, message: "no streams today" });
     });
 
+    it("refuses a malformed forced error instead of opening a stream", async () => {
+      const res = await listen({ notifications: {}, _meta: { "com.mcp-mock/error": { code: "bad" } } });
+      expect(res.headers.get("content-type")).toContain("application/json");
+      const body = (await res.json()) as { error: { code: number; message: string } };
+      expect(body.error.code).toBe(-32602);
+      expect(body.error.message).toContain("com.mcp-mock/error");
+    });
+
     it("advertises listChanged and subscribe in server/discover", async () => {
       const res = await fetch(`${running.origin}/2026-07-28/mcp`, {
         method: "POST",

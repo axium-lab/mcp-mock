@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import { CONTROL, notificationScript, type ScriptedEvent } from "../../core/control.ts";
+import { CONTROL, notificationScript, type ScriptedEvent, throwForcedError } from "../../core/control.ts";
 import { ErrorCode, type JsonRpcRequest, JsonRpcError } from "../../core/jsonrpc.ts";
 import { SERVER_INFO } from "../../core/server-info.ts";
 import { readResource } from "../../resources/index.ts";
@@ -108,10 +108,7 @@ export function serveListen(message: JsonRpcRequest, res: Response): void {
   let filter: Filter;
   let script: ReturnType<typeof notificationScript>;
   try {
-    const forced = (params?._meta as Record<string, unknown> | undefined)?.[CONTROL.error];
-    if (isObject(forced) && Number.isInteger(forced.code) && typeof forced.message === "string") {
-      throw new JsonRpcError(forced.code as number, forced.message, forced.data);
-    }
+    throwForcedError(params);
     if (!isObject(params?.notifications)) {
       throw new JsonRpcError(ErrorCode.InvalidParams, 'Invalid params: "notifications" must be an object');
     }

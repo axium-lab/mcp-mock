@@ -107,6 +107,13 @@ describe("dual-era /mcp over raw HTTP", () => {
       );
       expect(reply.status).toBe(202);
     });
+
+    it("refuses a batch containing a modern-enveloped request instead of falling back to 2025-03-26", async () => {
+      const reply = await post([modern("tools/list")]);
+      expect(reply.status).toBe(400);
+      expect(reply.body.error.code).toBe(-32600);
+      expectValid("2026-07-28", reply);
+    });
   });
 
   describe("legacy traffic", () => {

@@ -154,6 +154,20 @@ describe("2024-11-05 over raw HTTP+SSE", () => {
       sse.close();
     });
 
+    it("routes resources/subscribe inside a 2025-03-26 batch on /sse", async () => {
+      const sse = await openSse(`${running.origin}/sse`);
+      await sse.call(INITIALIZE("2025-03-26"));
+      const answers = await sse.call([
+        { jsonrpc: "2.0", id: 2, method: "resources/subscribe", params: { uri: "file:///docs/README.md" } },
+        { jsonrpc: "2.0", id: 3, method: "resources/unsubscribe", params: { uri: "file:///docs/README.md" } },
+      ]);
+      expect(answers).toEqual([
+        { jsonrpc: "2.0", id: 2, result: {} },
+        { jsonrpc: "2.0", id: 3, result: {} },
+      ]);
+      sse.close();
+    });
+
     it("serves 2024-11-05 before initialize and to clients that ask for it", async () => {
       const sse = await openSse(`${running.origin}/sse`);
       expect((await sse.call(INITIALIZE("2024-11-05"))).result.protocolVersion).toBe("2024-11-05");

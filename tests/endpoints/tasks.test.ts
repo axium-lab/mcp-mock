@@ -70,6 +70,19 @@ describe("tasks extension", () => {
     expect(reply.body.result.resultType).toBe("complete");
   });
 
+  it("returns a tool execution error instead of minting a task when simulate_work arguments are invalid", async () => {
+    for (const args of [
+      { steps: -5, step_ms: 100 },
+      { steps: 100, step_ms: 100 },
+      { steps: 2, step_ms: -1 },
+    ]) {
+      const reply = await rpc("tools/call", { name: "simulate_work", arguments: args });
+      expect(reply.status).toBe(200);
+      expect(reply.body.result).toMatchObject({ resultType: "complete", isError: true });
+      expect(validateMessage("2026-07-28", reply.body)).toEqual({ valid: true, errors: [] });
+    }
+  });
+
   it("reports working, then completed with the result the call would have returned", async () => {
     const created = (await rpc("tools/call", work(40))).body.result;
     const working = await rpc("tasks/get", { taskId: created.taskId });
@@ -147,6 +160,15 @@ describe("tasks extension", () => {
   describe("errors", () => {
     it.each(["tasks/get", "tasks/update", "tasks/cancel"])("%s answers an unknown task with -32602", async (method) => {
       const reply = await rpc(method, { taskId: "task_bm9wZQ" });
+      expect(reply.body.error.code).toBe(-32602);
+    });
+
+    it.each([
+      ["an out-of-range timestamp", { params: { name: "echo", arguments: { text: "x" } }, startedAt: 1e20, durationMs: 0 }],
+      ["a negative duration", { params: { name: "echo", arguments: { text: "x" } }, startedAt: Date.now(), durationMs: -100 }],
+    ])("answers a forged task with %s as unknown (-32602) instead of an internal error", async (_case, payload) => {
+      const taskId = `task_${Buffer.from(JSON.stringify(payload)).toString("base64url")}`;
+      const reply = await rpc("tasks/get", { taskId });
       expect(reply.body.error.code).toBe(-32602);
     });
 

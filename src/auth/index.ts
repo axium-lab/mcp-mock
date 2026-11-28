@@ -100,26 +100,39 @@ function isAbsoluteUrl(value: unknown): value is string {
 export function authRouter(): Router {
   const router = Router();
 
-  // Authorization server metadata (RFC 8414), also served as OpenID Connect
-  // discovery, since clients must support both.
-  const asMetadata = (req: Request, res: Response) => {
+  // Authorization server metadata (RFC 8414) and OpenID Connect Discovery 1.0,
+  // since clients must support both. OIDC discovery requires jwks_uri,
+  // subject_types_supported and id_token_signing_alg_values_supported.
+  const asMetadata = (base: string) => ({
+    issuer: base,
+    authorization_endpoint: `${base}/oauth/authorize`,
+    token_endpoint: `${base}/oauth/token`,
+    registration_endpoint: `${base}/oauth/register`,
+    response_types_supported: ["code"],
+    grant_types_supported: ["authorization_code", "refresh_token"],
+    code_challenge_methods_supported: ["S256"],
+    token_endpoint_auth_methods_supported: ["none"],
+    scopes_supported: [REQUIRED_SCOPE],
+    client_id_metadata_document_supported: true,
+    authorization_response_iss_parameter_supported: true,
+  });
+  router.get("/.well-known/oauth-authorization-server", (req, res) => {
+    res.json(asMetadata(origin(req)));
+  });
+  router.get("/.well-known/openid-configuration", (req, res) => {
     const base = origin(req);
     res.json({
-      issuer: base,
-      authorization_endpoint: `${base}/oauth/authorize`,
-      token_endpoint: `${base}/oauth/token`,
-      registration_endpoint: `${base}/oauth/register`,
-      response_types_supported: ["code"],
-      grant_types_supported: ["authorization_code", "refresh_token"],
-      code_challenge_methods_supported: ["S256"],
-      token_endpoint_auth_methods_supported: ["none"],
-      scopes_supported: [REQUIRED_SCOPE],
-      client_id_metadata_document_supported: true,
-      authorization_response_iss_parameter_supported: true,
+      ...asMetadata(base),
+      jwks_uri: `${base}/oauth/jwks`,
+      subject_types_supported: ["public"],
+      id_token_signing_alg_values_supported: ["RS256"],
     });
-  };
-  router.get("/.well-known/oauth-authorization-server", asMetadata);
-  router.get("/.well-known/openid-configuration", asMetadata);
+  });
+  // No JWTs or ID tokens are issued; an empty JWK Set satisfies clients that
+  // probe jwks_uri during OpenID Connect discovery.
+  router.get("/oauth/jwks", (_req, res) => {
+    res.json({ keys: [] });
+  });
 
   // Protected resource metadata (RFC 9728), one document per protected
   // endpoint, at the well-known path with the endpoint's path appended.

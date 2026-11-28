@@ -164,7 +164,7 @@ export function notificationScript(params: Record<string, unknown> | undefined):
 }
 
 // Throws the JSON-RPC error a request forces, if any.
-function throwForcedError(params: Record<string, unknown> | undefined): void {
+export function throwForcedError(params: Record<string, unknown> | undefined): void {
   const value = controlOf(params, CONTROL.error);
   if (value === undefined) return;
   const key = CONTROL.error;

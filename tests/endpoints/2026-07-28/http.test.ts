@@ -305,6 +305,21 @@ describe("2026-07-28 over raw HTTP", () => {
       expectValid(reply, "HeaderMismatchError");
     });
 
+    it("rejects a Base64 Mcp-Name carrying invalid UTF-8 bytes with 400 and -32020", async () => {
+      const invalidUtf8 = `=?base64?${Buffer.from([0xff, 0xfe]).toString("base64")}?=`;
+      const reply = await post(
+        request("tools/call", {
+          name: "\ufffd\ufffd",
+          arguments: {},
+          _meta: { ...META, "com.mcp-mock/response": { text: "should not run" } },
+        }),
+        { "mcp-name": invalidUtf8 },
+      );
+      expect(reply.status).toBe(400);
+      expect(reply.body.error.code).toBe(-32020);
+      expectValid(reply, "HeaderMismatchError");
+    });
+
     it("decodes a Base64 Mcp-Name before comparing it", async () => {
       const encoded = `=?base64?${Buffer.from("echo").toString("base64")}?=`;
       const reply = await post(call, { "mcp-name": encoded });

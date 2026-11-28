@@ -41,6 +41,14 @@ function png(path: string): ResourceContents {
 
 class NotFound extends Error {}
 
+function decodeSegment(raw: string): string {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    throw new NotFound();
+  }
+}
+
 // Every URI this mock can read, or NotFound. Unknown schemes, reserved values
 // and paths outside the root are all "not found": a resource either exists or
 // it does not.
@@ -59,14 +67,14 @@ function contentsOf(uri: string): ResourceContents {
 
   const weather = /^weather:\/\/(.+)$/.exec(uri);
   if (weather) {
-    const result = getWeather.run({ city: decodeURIComponent(weather[1] as string) }, {});
+    const result = getWeather.run({ city: decodeSegment(weather[1] as string) }, {});
     if ("isError" in result && result.isError) throw new NotFound();
     return { uri, mimeType: "application/json", text: JSON.stringify((result as { structuredContent: unknown }).structuredContent) };
   }
 
   const user = /^user:\/\/(.+)$/.exec(uri);
   if (user) {
-    const result = getUser.run({ user_id: decodeURIComponent(user[1] as string) }, {});
+    const result = getUser.run({ user_id: decodeSegment(user[1] as string) }, {});
     if ("isError" in result && result.isError) throw new NotFound();
     return { uri, mimeType: "application/json", text: JSON.stringify((result as { structuredContent: unknown }).structuredContent) };
   }

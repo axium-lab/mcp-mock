@@ -37,14 +37,19 @@ export function stripOws(value: string): string {
 
 const SENTINEL = /^=\?base64\?(.*)\?=$/s;
 const BASE64 = /^[A-Za-z0-9+/]*={0,2}$/;
+const UTF8 = new TextDecoder("utf-8", { fatal: true });
 
 // Values that are not plain header-safe ASCII travel as `=?base64?...?=`
-// (UTF-8, Base64). Returns undefined for a malformed sentinel, which the
-// server must reject rather than compare.
+// (UTF-8, Base64). Returns undefined for a malformed sentinel or invalid
+// UTF-8 bytes, which the server must reject rather than compare.
 export function decodeHeaderValue(value: string): string | undefined {
   const match = SENTINEL.exec(value);
   if (!match) return value;
   const encoded = match[1] as string;
   if (encoded.length % 4 !== 0 || !BASE64.test(encoded)) return undefined;
-  return Buffer.from(encoded, "base64").toString("utf-8");
+  try {
+    return UTF8.decode(Buffer.from(encoded, "base64"));
+  } catch {
+    return undefined;
+  }
 }
